@@ -5,6 +5,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Latex
+*.aux
+*.log
+*.synctex.gz
+*.out
+
 # Distribution / packaging
 .Python
 env/
@@ -55,3 +61,5 @@ docs/_build/
 
 # PyBuilder
 target/
+
+

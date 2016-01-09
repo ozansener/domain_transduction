@@ -1,0 +1,100 @@
+\documentclass{article}
+
+% use Times
+\usepackage{times}
+% For figures
+\usepackage{graphicx} % more modern
+\usepackage{subfigure} 
+
+% For citations
+\usepackage{natbib}
+
+% For algorithms
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% As of 2011, we use the hyperref package to produce hyperlinks in the
+% resulting PDF.  If this breaks your system, please commend out the
+% following usepackage line and replace \usepackage{icml2016} with
+% \usepackage[nohyperref]{icml2016} above.
+\usepackage{hyperref}
+
+% Packages hyperref and algorithmic misbehave sometimes.  We can fix
+% this with the following command.
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Employ the following version of the ``usepackage'' statement for
+% submitting the draft version of the paper for review.  This will set
+% the note in the first column to ``Under review.  Do not distribute.''
+\usepackage{icml2016} 
+
+% Employ this version of the ``usepackage'' statement after the paper has
+% been accepted, when creating the final version.  This will set the
+% note in the first column to ``Proceedings of the...''
+%\usepackage[accepted]{icml2016}
+
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{Unsupervised Domain Adaptation by Transduction}
+
+\begin{document} 
+
+\twocolumn[
+\icmltitle{Unsupervised Domain Adaptation by Transduction}
+
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2016
+% package.
+\icmlauthor{Ozan Sener}{ozansener@cs.stanford.edu}
+\icmladdress{Stanford University,
+		     Stanford, CA 94304, USA}
+		     \vspace{-2mm}
+\icmladdress{Cornell University,
+		     Ithaca, NY 14853, USA}
+\icmlauthor{Hyun Oh Song}{hyunoh@cs.stanford.edu}
+\icmladdress{Stanford University,
+		     Stanford, CA 94304, USA}
+
+\icmlauthor{Silvio Savarese}{silvio@stanford.edu}
+\icmladdress{Stanford University,
+		     Stanford, CA 94304, USA}
+\icmlauthor{Ashutosh Saxena}{ashutosh@brainoft.com}
+\icmladdress{Brain of Things,
+		     Cupertino, CA 94304, USA}
+
+
+% You may provide any keywords that you 
+% find helpful for describing your paper; these are used to populate 
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{domain adaptation, transductive learning, metric learning, deep learning}
+
+\vskip 0.3in
+]
+
+\begin{abstract} 
+Abstract.
+\end{abstract} 
+
+\section{Introduction}
+\label{intro}
+Intro
+
+\section{Related Work} 
+ Related work
+\section{Method}
+Method
+
+\section{Experimental Results}
+
+\section{Conclusion} 
+
+% Acknowledgements should only appear in the accepted version. 
+\section*{Acknowledgements} 
+a
+
+\bibliography{domain_trans}
+\bibliographystyle{icml2016}
+
+\end{document} 
