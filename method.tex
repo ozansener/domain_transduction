@@ -1,0 +1,102 @@
+% !TEX root = domain_transduction.tex
+\subsection{Problem Definition}
+We are interested in the problem in which we have an unsupervised domain $\{\mathbf{x_i}\}_{i \in [N^u]}$ and a supervised domain $\{\mathbf{\hat{x}_i}, \hat{y}_i\}_{i \in [N^s]}$ such that $\mathbf{x_i}$ is the extracted feature for point $i$ and $y_i$ is the corresponding label. We also assume that unsupervised and supervised features have the same dimension i.e. $\mathbf{x}, \mathbf{\hat{x}} \in \mathcal{R}^d$
+
+We consider an asymmetric similarity metric;
+\begin{equation}
+s(\mathbf{x_i}, \mathbf{\hat{x}_j}) = \mathbf{x_i}^\intercal \mathbf{W} \mathbf{\hat{x}_j}
+\end{equation}
+such that it is high if two points from supervised and unsupervised domains are similar to each other.
+
+We approach to the problem from a transduction perspective; in other words, the main purpose of the method is recovering the labels $y_i$ for each unsupervised example $\mathbf{x_i}$. We consider the following objective function in order to compute $y_i$ as well as the similarity metric $\mathbf{W}$.
+
+\begin{equation}
+\begin{aligned}
+\min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} \\
+&s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) \\
+&\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) 
+\end{aligned}
+\end{equation}
+
+We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$ and the similarity metric $\mathbf{W}$. We explain these two steps the following sections.
+
+\subsection{Labeling Unsupervised Points}
+We are using nearest neighbor rule in our labelling with an additional robustness metric. We first explain the nearest neighbor formulation then explain our extension. 
+
+Given a similarity metric $\mathbf{W}$, the labeling with nearest neighbor rule is;
+\begin{equation}
+(y_i)^{pred} = \hat{y}_{{\arg\max}_j s(\mathbf{x_i}, \mathbf{\hat{x}_j})}
+\end{equation}
+
+Although the nearest neighbor rule is computationally inefficient, we solve the efficiency issues through usage of batches with stochastic gradient descent as well as an efficient implementation though OpenBLAS routines. We discuss these details in the implementation section of the paper.
+
+Although the nearest neighbor rule is expected to work with a good metric, at the initial stage of the algorithm the metric will not be accurate enough. Hence, we need a robustness measure to handle the initial stage of the algorithm. Our robustness measure comes from the consistency of labels over the unsupervised data graph.
+
+We create a k-NN graph over the unsupervised data points such that $\mathcal{N}(\mathbf{x_i})$ is the k  unsupervised data point nearest to $\mathbf{x_i}$ via the $l_2$ distance. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points;
+
+\begin{equation}
+\begin{aligned}
+{\arg\min}_{y_i}  &\sum_{i \in N^u} \min_{\hat{y_j}=y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \\
+&+ \lambda
+\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} [1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}(y_i \neq y_j)
+\end{aligned}
+\end{equation}
+
+ADD NORMALIZATION STUFF TO MAKE THIS THING NON-NEGATIVE 
+
+
+In its original form, this problem is multi-label energy minimization and it is submodular. However, solving this problem is still computationally inefficient. Therefore, we propose an approximate solution by minimizing the lower bound of this algorithm.
+ \begin{equation}
+ \begin{aligned}
+ &\min_{\hat{y_j}=y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \\
+  &\geq \left(\min_{ (y_j)^{pred} = y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \right) \mathds{1}[(y_j)^{pred} = y_i] \\ &+ \left(\min_{ (y_j)^{pred} \neq y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \right) \mathds{1}[(y_j)^{pred} \neq y_i]  
+ \end{aligned}
+ \end{equation}
+ Moreover, the lower bound for the binary term can also be expressed as;
+ {\small
+ \begin{equation}
+ \begin{aligned}
+ &[1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}(y_i \neq y_j)   \\
+ &\geq [1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}[y_i=(y_i)^{pred}, y_j=(y_j)^{pred}, (y_i)^{pred} \neq (y_j)^{pred}] \\
+ &+  [1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}[y_i=(y_i)^{pred}, y_j \neq (y_j)^{pred}, (y_i)^{pred} = (y_j)^{pred}] \\
+ \end{aligned}
+ \end{equation}}
+ 
+ In other words we convert the multi-label problem into binary problem with auxiliary variables \mbox{$y^b_i = \mathds{1}[y_i = (y_i)^{pred}]$} and the binary energy minimization problem becomes;
+ 
+ \begin{equation}
+ \begin{aligned}
+&{\arg\min}_{y^b_i}  \sum_{i \in N^u} E_i(y^b_i) + \sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} E_{i,j} (y^b_i, y^b_j) \\
+&E_i(y^b_i) = \left\{ \begin{array}{cc} \min_{ (y_j)^{pred} = y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] & y^b_i = 1
+\\  \min_{ (y_j)^{pred} \neq y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] & y^b_i = 0 \\
+ \end{array} \right. \\
+&E_{i,j}(y^b_i,y^b_j) = \left\{ \begin{array}{cc} 1 - \mathbf{x_i}^T \mathbf{x_j}  & (y_i)^{pred}=(y_i)^{pred}, y^b_i \neq y^b_j \\ 1 - \mathbf{x_i}^T \mathbf{x_j} & (y_i)^{pred} \neq (y_i)^{pred}, y^b_i = y^b_j \\ 
+0 & o.w. \\ \end{array} \right. \\
+\end{aligned}
+ \end{equation}
+Although this function is not sub-modular, it can still be very efficiently minimized via QPBO(quadratic pseudo boolean optimization)\cite{kolmogrov} internally using min-cut/max-flow. After the energy minimization, the unsupervised data points with label $y_i=1$ keep their NN labels. For the rest, we sort them by using $\max_{j \in \mathcal{N}(\mathbf{x_i})} \mathbf{x_i}^T \mathbf{x_j}$ and start from the maximum similarity one and greedily assign labels as;
+\begin{equation}
+y_i = {\arg\max}_{y_i}  \max_{\hat{y_j}=y_i}  s(\mathbf{\hat{x_j}},\mathbf{x_{i}})]+ \lambda  \sum_{j \in \mathcal{N}(\mathbf{x_i})\cap P}  \mathbf{x_i}^T \mathbf{x_j} \mathds{1}(y_i \neq y_j)
+\end{equation}
+where $P$ is the set of points with label $y^b_i=1$ and the points which are already processed via the greedy operation. We  continue until all other points having the binary label $y^b_i=0$ is labeled.
+
+\subsection{Learning Similarity Metric}
+Given the predicted labels $y_i$ for unsupervised data points $\mathbf{x_i}$, we learn the asymmetric metric following the LMNN(Large Margin Nearest Neighbour)\cite{lmnn} construction. We start with finding the nearest positive and negative examples through;
+\begin{equation}
+\begin{aligned}
+&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) \\
+&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) 
+\end{aligned}
+\end{equation}
+Then, we construct the loss function with regularizer;
+\begin{equation}
+\min_{\mathbf{W}, y_i} \sum_{i \in [N^s]} [s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} + r(\mathbf{W})
+\end{equation}
+which is convex in terms of the similarity metric $\mathbf{W}$ if the regularizer is convex; and we optimize it by using Stochastic gradient descent through the subgradient $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} =$
+\begin{equation}
+\sum_{i \in [N^s]} \mathds{1}[s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) > \alpha] \left( \mathbf{\hat{x_i}}\mathbf{x_{i^-}}^\intercal - \mathbf{\hat{x_i}}\mathbf{x_{i^+}}^\intercal  \right)  + \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}}
+\end{equation}
+As a regularizer we are using the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$ 
+
+\subsection{Learning Features}
+\subsection{Learning with Synthetic Data}
