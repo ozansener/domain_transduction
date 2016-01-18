@@ -36,49 +36,12 @@ We create a k-NN graph over the unsupervised data points such that $\mathcal{N}(
 
 \begin{equation}
 \begin{aligned}
-{\arg\min}_{y_i}  &\sum_{i \in N^u} \min_{\hat{y_j}=y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \\
+{\arg\min}_{y_i}  &\sum_{i \in N^u} - \max_{\hat{y_j}=y_i}  s(\mathbf{\hat{x_j}},\mathbf{x_{i}}) \\
 &+ \lambda
-\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} [1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}(y_i \neq y_j)
+\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} \mathbf{x_i}^T \mathbf{x_j}\mathds{1}(y_i \neq y_j)
 \end{aligned}
 \end{equation}
-
-ADD NORMALIZATION STUFF TO MAKE THIS THING NON-NEGATIVE 
-
-
-In its original form, this problem is multi-label energy minimization and it is submodular. However, solving this problem is still computationally inefficient. Therefore, we propose an approximate solution by minimizing the lower bound of this algorithm.
- \begin{equation}
- \begin{aligned}
- &\min_{\hat{y_j}=y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \\
-  &\geq \left(\min_{ (y_j)^{pred} = y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \right) \mathds{1}[(y_j)^{pred} = y_i] \\ &+ \left(\min_{ (y_j)^{pred} \neq y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] \right) \mathds{1}[(y_j)^{pred} \neq y_i]  
- \end{aligned}
- \end{equation}
- Moreover, the lower bound for the binary term can also be expressed as;
- {\small
- \begin{equation}
- \begin{aligned}
- &[1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}(y_i \neq y_j)   \\
- &\geq [1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}[y_i=(y_i)^{pred}, y_j=(y_j)^{pred}, (y_i)^{pred} \neq (y_j)^{pred}] \\
- &+  [1 - \mathbf{x_i}^T \mathbf{x_j}] \mathds{1}[y_i=(y_i)^{pred}, y_j \neq (y_j)^{pred}, (y_i)^{pred} = (y_j)^{pred}] \\
- \end{aligned}
- \end{equation}}
- 
- In other words we convert the multi-label problem into binary problem with auxiliary variables \mbox{$y^b_i = \mathds{1}[y_i = (y_i)^{pred}]$} and the binary energy minimization problem becomes;
- 
- \begin{equation}
- \begin{aligned}
-&{\arg\min}_{y^b_i}  \sum_{i \in N^u} E_i(y^b_i) + \sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} E_{i,j} (y^b_i, y^b_j) \\
-&E_i(y^b_i) = \left\{ \begin{array}{cc} \min_{ (y_j)^{pred} = y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] & y^b_i = 1
-\\  \min_{ (y_j)^{pred} \neq y_i} [1 - s(\mathbf{\hat{x_j}},\mathbf{x_{i}})] & y^b_i = 0 \\
- \end{array} \right. \\
-&E_{i,j}(y^b_i,y^b_j) = \left\{ \begin{array}{cc} 1 - \mathbf{x_i}^T \mathbf{x_j}  & (y_i)^{pred}=(y_i)^{pred}, y^b_i \neq y^b_j \\ 1 - \mathbf{x_i}^T \mathbf{x_j} & (y_i)^{pred} \neq (y_i)^{pred}, y^b_i = y^b_j \\ 
-0 & o.w. \\ \end{array} \right. \\
-\end{aligned}
- \end{equation}
-Although this function is not sub-modular, it can still be very efficiently minimized via QPBO(quadratic pseudo boolean optimization)\cite{kolmogrov} internally using min-cut/max-flow. After the energy minimization, the unsupervised data points with label $y_i=1$ keep their NN labels. For the rest, we sort them by using $\max_{j \in \mathcal{N}(\mathbf{x_i})} \mathbf{x_i}^T \mathbf{x_j}$ and start from the maximum similarity one and greedily assign labels as;
-\begin{equation}
-y_i = {\arg\max}_{y_i}  \max_{\hat{y_j}=y_i}  s(\mathbf{\hat{x_j}},\mathbf{x_{i}})]+ \lambda  \sum_{j \in \mathcal{N}(\mathbf{x_i})\cap P}  \mathbf{x_i}^T \mathbf{x_j} \mathds{1}(y_i \neq y_j)
-\end{equation}
-where $P$ is the set of points with label $y^b_i=1$ and the points which are already processed via the greedy operation. We  continue until all other points having the binary label $y^b_i=0$ is labeled.
+This problem is sub-modular and can easily be optimized through many methods like $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO), linear programming through roof-duality etc. We use $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta}. 
 
 \subsection{Learning Similarity Metric}
 Given the predicted labels $y_i$ for unsupervised data points $\mathbf{x_i}$, we learn the asymmetric metric following the LMNN(Large Margin Nearest Neighbour)\cite{lmnn} construction. We start with finding the nearest positive and negative examples through;
