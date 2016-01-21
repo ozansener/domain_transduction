@@ -1,14 +1,14 @@
 % !TEX root = domain_transduction.tex
 \subsection{Problem Definition}
-We are interested in the problem in which we have an unsupervised domain $\{\mathbf{x_i}\}_{i \in [N^u]}$ and a supervised domain $\{\mathbf{\hat{x}_i}, \hat{y}_i\}_{i \in [N^s]}$ such that $\mathbf{x_i}$ is the extracted feature for point $i$ and $y_i$ is the corresponding label. We also assume that unsupervised and supervised features have the same dimension i.e. $\mathbf{x}, \mathbf{\hat{x}} \in \mathcal{R}^d$
+We are trying to learn the relationships between two domains of data. In our setting, one of the domains is fully supervised and has both data points as well as class labels $\{\mathbf{\hat{x}_i}, \hat{y}_i\}_{i \in [N^s]}$ such that $\mathbf{x_i}$ is the data point $i$ and $y_i$ is the corresponding label. Whereas, the other domain is unsupervised and only have data points as $\{\mathbf{x_i}\}_{i \in [N^u]}$. We further assume that there is a feature function $\Phi(\cdot)$ which is used in both of the domains.
 
-We consider an asymmetric similarity metric;
+We formulate our problem as a metric learning problem and consider an an asymmetric similarity metric;
 \begin{equation}
-s(\mathbf{x_i}, \mathbf{\hat{x}_j}) = \mathbf{x_i}^\intercal \mathbf{W} \mathbf{\hat{x}_j}
+s(\mathbf{x_i}, \mathbf{\hat{x}_j}) = \Phi(\mathbf{x_i})^\intercal \mathbf{W} \Phi(\mathbf{\hat{x}_j})
 \end{equation}
 such that it is high if two points from supervised and unsupervised domains are similar to each other.
 
-We approach to the problem from a transduction perspective; in other words, the main purpose of the method is recovering the labels $y_i$ for each unsupervised example $\mathbf{x_i}$. We consider the following objective function in order to compute $y_i$ as well as the similarity metric $\mathbf{W}$.
+We model our learning setting in a fully transductive setting; in other words, the main purpose of the method is recovering the labels $y_i$ for each unsupervised example $\mathbf{x_i}$. We consider the following objective function in order to compute $y_i$ as well as the similarity metric $\mathbf{W}$.
 
 \begin{equation}
 \begin{aligned}
@@ -16,23 +16,29 @@ We approach to the problem from a transduction perspective; in other words, the 
 &s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) \\
 &\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) 
 \end{aligned}
+\label{loss}
 \end{equation}
 
 We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$ and the similarity metric $\mathbf{W}$. We explain these two steps the following sections.
 
 \subsection{Labeling Unsupervised Points}
-We are using nearest neighbor rule in our labelling with an additional robustness metric. We first explain the nearest neighbor formulation then explain our extension. 
+\label{label}
+\begin{figure}[ht]
+\includegraphics[width=\columnwidth]{figure1}
+\caption{\textbf{Visualization of the Label Propogation.} Consider the unsupervised point $x_3$, the  resulting label would be:
+\mbox{ ${\arg\min}_{y_3} -s(\hat{\mathbf{x}}_4,\mathbf{x}_3)\mathds{1}(\mathbf{y}_3=1) -s(\hat{\mathbf{x}}_{10},\mathbf{x}_3)\mathds{1}(y_3=2)$} $ -s(\hat{\mathbf{x}}_{11},\mathbf{x}_3)\mathds{1}(y_3=0) + \Phi(\mathbf{x}_2)^\intercal\phi(\mathbf{x}_3)\mathds{1}(y_3 \neq y_2) +\Phi(\mathbf{x}_3)^\intercal\phi(\mathbf{x}_4)\mathds{1}(y_3 \neq y_4) $ assuming green is $0$, blue is $1$ and red is $2$}
+\label{vis_label_prop}
+\end{figure}
+In order to label the unsupervised data-points, we use nearest-neighbor(NN) rule as computing the NN supervised datapoint using the learned metric $s(\cdot,\cdot)$. Moreover, the NN rule will be accurate only if the metric is accurate enough. Since our algorithm is iterative alternating optimization, we still need rather accurate labeling even in the case of sub-optimal similarity metric. Hence, we introduce an additional robustness measure through label propogation. We first explain our NN-rule, then extend it to label propagation.
 
-Given a similarity metric $\mathbf{W}$, the labeling with nearest neighbor rule is;
+Given a similarity metric $s(\cdot,\cdot)$, the nearest neighbor rule is;
 \begin{equation}
 (y_i)^{pred} = \hat{y}_{{\arg\max}_j s(\mathbf{x_i}, \mathbf{\hat{x}_j})}
 \end{equation}
 
-Although the nearest neighbor rule is computationally inefficient, we solve the efficiency issues through usage of batches with stochastic gradient descent as well as an efficient implementation though OpenBLAS routines. We discuss these details in the implementation section of the paper.
+The major issue for using the nearest neighbor rule is computationally efficiency. However, our implementation method and choice of parameters makes the NN rule tractable. We explain how we use stochastic gradient descent, select the batch size and efficiently implement the NN rule using OpenBLAS in Section\ref{imp_det}. 
 
-Although the nearest neighbor rule is expected to work with a good metric, at the initial stage of the algorithm the metric will not be accurate enough. Hence, we need a robustness measure to handle the initial stage of the algorithm. Our robustness measure comes from the consistency of labels over the unsupervised data graph.
-
-We create a k-NN graph over the unsupervised data points such that $\mathcal{N}(\mathbf{x_i})$ is the k  unsupervised data point nearest to $\mathbf{x_i}$ via the $l_2$ distance. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points;
+In order to make our transduction stage robust, we use label propagation. Main idea behind our label propagation approach is enforcing consistency of the labels over unsupervised data points. In order to enforce this consistency, we create a k-NN graph over the unsupervised data points such that neighbor set $\mathcal{N}(\mathbf{x_i})$ for $\mathbf{x}_i$ is the k-unsupervised data point nearest to $\mathbf{x_i}$ using the $l_2$ distance in feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points;
 
 \begin{equation}
 \begin{aligned}
@@ -40,28 +46,65 @@ We create a k-NN graph over the unsupervised data points such that $\mathcal{N}(
 &+ \lambda
 \sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} \mathbf{x_i}^T \mathbf{x_j}\mathds{1}(y_i \neq y_j)
 \end{aligned}
+\label{robtran}
 \end{equation}
-This problem is sub-modular and can easily be optimized through many methods like $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO), linear programming through roof-duality etc. We use $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta}. 
+This problem is sub-modular and can easily be optimized through many methods like $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO), linear programming through roof-duality etc. We use $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta}. In order to further explain the label propagation, we visualize a sample example with $k=2$ and $3$-class classification problem in Figure~\ref{vis_label_prop}. Since it is rather out-of-scope of this paper, we explain the details of the $\alpha$-$\beta$ swapping algorithm to the appendix.
 
 \subsection{Learning Similarity Metric}
-Given the predicted labels $y_i$ for unsupervised data points $\mathbf{x_i}$, we learn the asymmetric metric following the LMNN(Large Margin Nearest Neighbour)\cite{lmnn} construction. We start with finding the nearest positive and negative examples through;
+\label{metric}
+Given the predicted labels $y_i$ for unsupervised data points $\mathbf{x_i}$, we need to learn the asymmetric metric in order to optimize the loss function defined in (\ref{loss}). We extend the LMNN(Large Margin Nearest Neighbour)\cite{lmnn} construction to the multi-domain case in order to define our metric learning objective.
+
+Main intuition behind our formulation is searching for a metric which will label the supervised data points correctly using the unsupervised data points and their predicted labels. Since at this stage we already have a predicted label for each unsupervised data points, we can estimate a label for the supervised data points using these predicted labels. We also have ground truth labels for the supervised data points and we can look for a metric which will maximize the accuracy. In other words, the over all metric learning is combination of;
+
+\begin{itemize}
+\item predicting $\hat{y}^{pred}_j$ using $\mathbf{x_i}, \mathbf{\hat{x}_j},\hat{y}_j$
+\item learning $s(\cdot,\cdot)$ by penalizing  $(\hat{y}_j)^{pred} \neq \hat{y}_j$ 
+\end{itemize}
+
+Fortunately, this can be jointly solved by minimizing the triplet loss as we define through nearest same-class and different-class examples of each supervised datapoint from unsupervised data points. In other words, we find the nearest positive and negative examples through;
 \begin{equation}
 \begin{aligned}
 &i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) \\
 &i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) 
+\label{sup_nn}
 \end{aligned}
 \end{equation}
-Then, we construct the loss function with regularizer;
+Then, we construct the triplet loss function with regularizer as;
 \begin{equation}
 \min_{\mathbf{W}, y_i} \sum_{i \in [N^s]} [s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} + r(\mathbf{W})
 \end{equation}
-which is convex in terms of the similarity metric $\mathbf{W}$ if the regularizer is convex; and we optimize it by using Stochastic gradient descent through the subgradient $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} =$
+which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and we optimize it by using Stochastic gradient descent through the subgradient $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} =$
 \begin{equation}
-\sum_{i \in [N^s]} \mathds{1}[s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) > \alpha] \left( \mathbf{\hat{x_i}}\mathbf{x_{i^-}}^\intercal - \mathbf{\hat{x_i}}\mathbf{x_{i^+}}^\intercal  \right)  + \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}}
+\sum_{i \in [N^s]} \mathds{1}(s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})>\alpha) \left( \mathbf{\hat{x_i}}\mathbf{x_{i^-}}^\intercal - \mathbf{\hat{x_i}}\mathbf{x_{i^+}}^\intercal  \right)  + \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}}
+\label{gradw}
 \end{equation}
-As a regularizer we are using the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$ 
-
+As a regularizer we are using the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine and how we implement in the Section~\ref{implementation}.
 \subsection{Learning Features}
-\subsection{Efficient Concerns}
+In Section~\ref{label}~and~\ref{metric}, we developed our transductive labeling method with propogation and the way to learn the metric $s(\cdot,\cdot)$ through learning $\mathbf{W}$. During this formulation, we used a pre-defined feature function $\Phi$. However, the current trends in machine learning suggests that learning this feature function $\Phi$ from the data directly is a promising direction especially for visual data points. Hence, we consider the case $\Phi_{\mathbf{\Theta}}$ is a parametrized feature function with parameter set $\mathbf{\Theta}$. A typical example is CNNs(convolutional neural networks) with $\mathbf{\Theta}$ as concatenation of weights and biases. We update the feature weights as part of the metric learning. Hence, the gradient update for $\mathbf{\Theta}$ becomes; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\Theta}} =$
+\begin{equation}
+ \sum_{i \in [N^s]} \mathds{1}(s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})) \left(\frac{\partial s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) }{\partial \mathbf{\Theta}} - \frac{\partial s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})) }{\partial \mathbf{\Theta}} \right)
+ \label{gradt}
+\end{equation}
 
-ADD THE FINAL ALGO HERE IN ALGORITHMIC FORMAT
+\subsection{Implementation Details}
+\subsection{Weakly-Supervised Case}
+
+\begin{algorithm}[tb]
+   \caption{Robust Transduction with Metric Learning}
+   \label{alg:example}
+\begin{algorithmic}
+   \STATE {\bfseries Input:} unsupervised $\mathbf{x}_i$, supervised $\mathbf{\hat{x}}_i$, $y_i$, batch size $B$
+   \REPEAT
+   \STATE  Sample $(\mathbf{x}^b_1,\ldots \mathbf{x^b}_B)$, $(\mathbf{\hat{x}}^b_1,\ldots \mathbf{\hat{x}}^b_B)$, $(\hat{y}^b_1,\ldots \hat{x}^b_B)$
+   \STATE Solve (\ref{robtran}) using $(\mathbf{x}^b_1,\ldots \mathbf{x^b}_B)$ and  $(\mathbf{\hat{x}}_1,\ldots \mathbf{\hat{x}}_{N^s})$
+   \FOR{$i=1$ {\bfseries to} $B$}
+      \IF{$ \hat{y}_i \textbf{ in } y_1 \ldots y_B $} 
+   \STATE Compute ($i^+, i^-$) via $(\mathbf{x}^b_1,\ldots \mathbf{x^b}_B)$, $(\mathbf{\hat{x}}^b_1,\ldots \mathbf{\hat{x}}^b_B)$ 
+   \STATE Update $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\Theta}}$ and  $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
+   \ENDIF
+   \ENDFOR
+   \STATE $\mathbf{W} \leftarrow \mathbf{W} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}}$ 
+   \STATE $\mathbf{\Theta} \leftarrow \mathbf{\Theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\Theta}}$
+   \UNTIL CONVERGENCE or $MAX\_ITER$
+\end{algorithmic}
+\end{algorithm}
