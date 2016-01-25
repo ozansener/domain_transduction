@@ -48,14 +48,9 @@ We further share our learned models as well as the source code using TensorFlow\
 We are evaluating all of the algorithms using the \emph{fully-transductive} setting. In other words,  we feed training set of source and target to our transductive domain adaptation algorithm. As an evaluation, we directly evaluate the labels obtain for the target unsupervised training data. We report the accuracy as the learning metric. Accuracy is the ratio of the correctly classified data points to the target unsupervised training data points.
 
 \subsection{Results}
-\subsubsection{Effect of label propogation and feature laerning}
-In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{our-method-no-prop}) and a variant without feature learning (noted as \emph{our-method-no-fl}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. Results are show in the Figure~\ref{fllprop}. 
-  
-\begin{figure}[ht]
-\caption{Accuracy vs number of iterations for our-method, our-method-no-prop and our-method-no-fl. As the figure suggests the label propagation both increase the learning rate as well as the final accuracy. Moreover, the feature learning also have a significant effect on the accuracy.}
-\label{fllprop}
-\end{figure}
 \begin{table*}[t]
+\caption{Accuracy of our method and the state-of-the-art algorithms on various datasets and various adaptation settings}
+\label{tab:res}
 \resizebox{\textwidth}{!}{
 \begin{tabular}{@{}rcccccccc@{}} \toprule 
  Source & Amazon & D-SLR & Webcam & Webcam &Amazon & D-SLR & MNIST-M & MNIST \\
@@ -69,7 +64,29 @@ DAN \cite{wang15} & $.685$ & $.960$ & $.990$ & $.531$ & $.670$ & $.540$ & $$ &\\
 Backprop \cite{ganin15} & $.730$ &$\mathbf{.964}$ & $\mathbf{.992}$ & & & & & $.771$ \\
 \midrule
 Source Only & $.642$ & $.961$ & $.978$ & & & & & $.524$ \\
-Our Method & $\mathbf{.781}$ &.930 & $.987$ & $.625$ & $.839$ & $.567$ & $.835$ & $\mathbf{.855}$\\
+Our Method & $\mathbf{.791}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ & $\mathbf{.567}$ & $\mathbf{.835}$ & $\mathbf{.855}$\\
  \bottomrule
 \end{tabular}}
 \end{table*}
+
+We compare our method with all state-of-the-art unsupervised domain adaptation algorithms and summarize the results in Table~\ref{tab:res}. 
+
+Table~\ref{tab:res} suggests that our algorithm is on-par/slightky with state of the art method for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images. Considering the fact that we are using nearest neighbor as a classifier, our algorithm needs large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm.
+
+Table~\ref{tab:res} suggests our algorithm significantly outperforms all other examples when there is large domain difference like MNIST$\leftrightarrow$MNIST-M, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We believe this results is mostly due to the transductive modeling. All competing algorithms are seeking for features and models independent of domains, in other words they seek of classifiers which will be accurate on all domains. However, this is rather counter-intuitive when there is large domain difference like Amazon images vs webcam images or textured images vs handwritten digits. We seek for asymmetric transformation between domains. In other words, instead of invariance, we seek for equivariance. 
+
+
+\subsubsection{Effect of label propagation and feature learning}
+In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{our-method-no-prop}) and a variant without feature learning (noted as \emph{our-method-no-fl}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. Results are show in the Figure~\ref{fllprop}. 
+
+As the Figure~\ref{fllprop} suggests, both feature learning and label propagation is crucial for successful transduction. The feature learning has a slightly larger effect. Moreover the necessity of domain invariant features are proven to be helpful in various work\cite{ganin15, tzeng14} in the literature. We further analyze the learned features as well as the label propagation performance more qualitatively in the following sections.
+
+\begin{figure}[ht]
+\includegraphics[width=\columnwidth]{figure_1fl}
+\caption{Accuracy vs number of iterations for our-method, our-method-no-prop and our-method-no-fl. As the figure suggests the label propagation both increase the learning rate as well as the final accuracy. Moreover, the feature learning also have a significant effect on the accuracy.}
+\label{fllprop}
+\end{figure}
+
+\subsubsection{Qualitative Analysis}
+Here we will have t-SNE plots and some NN results
+
