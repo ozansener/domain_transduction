@@ -70,7 +70,7 @@ Our Method & $\mathbf{.791}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ 
 \end{tabular}}
 \end{sc}
 \end{table*}
-
+% MNIST -> SVHN: .323
 We compare our method with all state-of-the-art unsupervised domain adaptation algorithms and summarize the results in Table~\ref{tab:res}. 
 
 Table~\ref{tab:res} suggests that our algorithm is on-par/slightky with state of the art method for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images. Considering the fact that we are using nearest neighbor as a classifier, our algorithm needs large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm.
@@ -90,5 +90,30 @@ As the Figure~\ref{fllprop} suggests, both feature learning and label propagatio
 \end{figure}
 
 \subsubsection{Qualitative Analysis}
+
+\begin{figure*}[ht]
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{na_st.png}
+        \caption{S. and T. w/o Adaptation}
+        \label{fig:gull}
+    \end{subfigure}~\begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{st.png}
+        \caption{S. and T. with Adaptation}
+        \label{fig:gull}
+    \end{subfigure}
+
+    \begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{sc.png}
+        \caption{Source Labels w/ Adaptation}
+        \label{fig:gull}
+    \end{subfigure}~\begin{subfigure}[b]{0.5\textwidth}
+        \includegraphics[width=\textwidth]{tc.png}
+        \caption{Target Labels w/ Adaptation}
+        \label{fig:gull}
+    \end{subfigure}
+\caption{tSNE plots for features without and with unsupervised adaptation. Please note that the discriminative behavior emerges in the unsupervised target instead of source domain. This explain the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in. Also note that our features are not invariant but the nearest neighbor arrows suggests that there is a consistent transformation, in other words our features are equivariant. }
+\end{figure*}
+
+
 Here we will have t-SNE plots and some NN results
 
