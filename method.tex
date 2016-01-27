@@ -73,18 +73,24 @@ Then, we construct the triplet loss function with regularizer as;
 \begin{equation}
 \min_{\mathbf{W}, y_i} \sum_{i \in [N^s]} [s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} + r(\mathbf{W})
 \end{equation}
-which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and we optimize it by using Stochastic gradient descent through the subgradient $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} =$
+which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and we optimize it by using Stochastic gradient descent through the subgradient $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} = \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}} + $
+%\begin{small}
 \begin{equation}
-\sum_{i \in [N^s]} \mathds{1}(s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})>\alpha) \left( \mathbf{\hat{x_i}}\mathbf{x_{i^-}}^\intercal - \mathbf{\hat{x_i}}\mathbf{x_{i^+}}^\intercal  \right)  + \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}}
+\sum_{i \in [N^s]} \mathds{1}(s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})>\alpha) \left( \mathbf{\hat{x_i}}\mathbf{x_{i^-}}^\intercal - \mathbf{\hat{x_i}}\mathbf{x_{i^+}}^\intercal  \right)  
 \label{gradw}
 \end{equation}
+%\end{small}
 As a regularizer we are using the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine and how we implement in the Section~\ref{implementation}.
 \subsection{Learning Features}
 In Section~\ref{label}~and~\ref{metric}, we developed our transductive labeling method with propogation and the way to learn the metric $s(\cdot,\cdot)$ through learning $\mathbf{W}$. During this formulation, we used a pre-defined feature function $\Phi$. However, the current trends in machine learning suggests that learning this feature function $\Phi$ from the data directly is a promising direction especially for visual data points. Hence, we consider the case $\Phi_{\mathbf{\Theta}}$ is a parametrized feature function with parameter set $\mathbf{\Theta}$. A typical example is CNNs(convolutional neural networks) with $\mathbf{\Theta}$ as concatenation of weights and biases. We update the feature weights as part of the metric learning. Hence, the gradient update for $\mathbf{\Theta}$ becomes; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\Theta}} =$
+
+\begin{small}
 \begin{equation}
- \sum_{i \in [N^s]} \mathds{1}(s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})) \left(\frac{\partial s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) }{\partial \mathbf{\Theta}} - \frac{\partial s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})) }{\partial \mathbf{\Theta}} \right)
+ \sum_{i \in [N^s]} \mathds{1}(s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}})) \left(\frac{\partial s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) }{\partial \mathbf{\Theta}} - \frac{\partial s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) }{\partial \mathbf{\Theta}} \right)
  \label{gradt}
 \end{equation}
+\end{small}
+
 
 \begin{algorithm}[tb]
    \caption{Robust Transduction with Metric Learning}

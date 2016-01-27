@@ -49,27 +49,54 @@ We are evaluating all of the algorithms using the \emph{fully-transductive} sett
 
 \subsection{Results}
 \begin{table*}[t]
-\caption{Accuracy of our method and the state-of-the-art algorithms on various datasets and various adaptation settings}
+\caption{Accuracy of our method and the state-of-the-art algorithms on Office dataset and various adaptation settings}
 \label{tab:res}
 \begin{sc}
-\resizebox{\textwidth}{!}{
-\begin{tabular}{@{}rcccccccc@{}} \toprule 
- Source & Amazon & D-SLR & Webcam & Webcam &Amazon & D-SLR & MNIST-M & MNIST \\
- Target & Webcam & Webcam & D-SLR & Amazon & D-SLR & Amazon & MNIST & MNIST-M\\
+\begin{center}
+\begin{small}
+\begin{tabular}{@{}rcccccc@{}} \toprule 
+ Source & Amazon & D-SLR & Webcam & Webcam &Amazon & D-SLR \\
+ Target & Webcam & Webcam & D-SLR & Amazon & D-SLR & Amazon \\
  \midrule
-GFK \cite{gong2012} & $.398$ & $.791$ & $.746 $ & $.371$ & $.379$ & .379 &  &  \\
-SA* \cite{fernando13} & $.450$ & $.648$ & $.699$ & $.393$ & $.388$ & $.420$ &  & $.567$\\
-DLID \cite{chopra13} & $.519$ & $.782$ & $.899$ & & & & &\\
-DDC \cite{tzeng14} & $.618$ & $.950$ & $.985$ & $.522$ & $.644$& $.521$& &\\
-DAN \cite{wang15} & $.685$ & $.960$ & $.990$ & $.531$ & $.670$ & $.540$ & $$ &\\
-Backprop \cite{ganin15} & $.730$ &$\mathbf{.964}$ & $\mathbf{.992}$ & $.536$ & $.728$ & $.544$& & $.771$ \\
+GFK \cite{gong2012} & $.398$ & $.791$ & $.746 $ & $.371$ & $.379$ & .379   \\
+SA* \cite{fernando13} & $.450$ & $.648$ & $.699$ & $.393$ & $.388$ & $.420$ \\
+DLID \cite{chopra13} & $.519$ & $.782$ & $.899$ & -&- &- \\
+DDC \cite{tzeng14} & $.618$ & $.950$ & $.985$ & $.522$ & $.644$& $.521$\\
+DAN \cite{wang15} & $.685$ & $.960$ & $.990$ & $.531$ & $.670$ & $.540$ \\
+Backprop \cite{ganin15} & $.730$ &$\mathbf{.964}$ & $\mathbf{.992}$ & $.536$ & $.728$ & $.544$\\
 \midrule
-Source Only & $.642$ & $.961$ & $.978$ & & & & & $.524$ \\
-Our Method & $\mathbf{.791}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ & $\mathbf{.567}$ & $\mathbf{.835}$ & $\mathbf{.855}$\\
+Source Only & $.642$ & $.961$ & $.978$ & $.452$ & $.668$ & $.476$ \\
+Our Method & $\mathbf{.804}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ & $\mathbf{.567}$ \\
  \bottomrule
-\end{tabular}}
+\end{tabular}
+\end{small}
+\end{center}
 \end{sc}
 \end{table*}
+
+
+
+\begin{table}[t]
+\caption{Accuracy of our method and the digit classification task.}
+\label{tab:res}
+\begin{sc}
+\begin{small}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}r@{\hskip 1mm}c@{\hskip 1mm}c@{\hskip 1mm}c@{\hskip 1mm}c@{}} \toprule 
+Source & M-M & MNIST  & SVHN & MNIST \\
+Target&  MNIST & M-M & MNIST & SVHN\\
+ \midrule
+SA* \cite{fernando13}&  & $.569$ & $.593$ & \\
+BP \cite{ganin15} & & $.766$ & $.738$ & \\
+\midrule
+Source Only  & & $.522$  &.549 &\\
+Our Method & $\mathbf{.835}$ & $\mathbf{.855}$ & & $\mathbf{.323}$\\
+ \bottomrule
+\end{tabular}}
+\end{small}
+\end{sc}
+\end{table}
+
 % MNIST -> SVHN: .323
 We compare our method with all state-of-the-art unsupervised domain adaptation algorithms and summarize the results in Table~\ref{tab:res}. 
 
