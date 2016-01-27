@@ -84,7 +84,15 @@ Abstract.
 
 \section{Introduction}
 \label{intro}
-Intro
+
+
+Recently deep convolutional neural networks \cite{alexnet, vggnet, googlenet} have propelled unprecedented advances in artificial intelligence including object recognition, speech recognition, and image captioning. However, one of the major drawbacks of the method is that the network requires a lot of labelled training data to fit millions of parameters in the complex network model. However, creating such datasets with complete annotations is not only tedious and error prone but also extremely costly. In this regard, the research community have proposed different mechanisms such as semi-supervised learning \cite{semisup}, transfer learning \cite{transfer}, weakly labelled learning, and domain adaptation techniques. Of the approaches, domain adaptation is one of the most appealing technique when a fully annotated dataset (i.e. ImageNet \cite{ImageNet}, large dataset \cite{large dataset}) is available as a reference. 
+
+Formally, the goal of unsupervised domain adaptation is to automatically transfer the annotations from one dataset to another while taking the domain shift across the datasets into account. The majority of the literature \cite{gong12, baochen15, fernando13, baochen16, tommasi13} in unsupervised domain adaptation formulates a learning problem where the task is to find a transformation matrix to align the labelled source data distribution to unlabelled target data distribution. Although these approaches show promising results, it does not take the actual inference procedure into the learning algorithm.
+
+Concretely, we formulate a unified framework where the domain transformation parameter and the target labels are jointly optimized in two alternating stages. In the transduction stage, given a fixed domain transform parameter, we jointly infer all target labels by solving a discrete multi-label energy minimization problem. In the adaptation stage, given a fixed target label assignment, we seek to find the optimal asymmetric metric transformation between the source and the target data. The advantage of the method is that the we can learn a domain transformation parameter which is aware of the subsequent transductive inference procedure. 
+
+Following the standard evaluation protocol in the domain adaptation community, we evaluate our method on the benchmark MNIST \cite{mnist} and Office \cite{office} datasets and demonstrate state of the art performance in comparison to all existing unsupervised domain adaptation methods.
 
 \section{Related Work} 
 
@@ -96,7 +104,9 @@ This paper is closely related to two active research areas: (1) Unsupervised dom
 
 \textbf{Transductive learning}: In transductive learning literature \cite{transduction}, the model has access to unlabelled test samples during training. Recently, \cite{coclassification} tackled a classification problem where predictions are made jointly across all test examples in a transductive \cite{transduction} setting. The method essentially enforces the notion that the true labels vary smoothly with respect to the input data. In our work, we extend this notion to infer the multiclass labels of unsupervised target data in a k-NN graph. 
 
-To summarize, our main contribution is to formulate joint optimization framework where we alternate between inferring target labels via discrete energy minimization (\textit{transduction}) and learning asymmetric transformation between source and target examples. Our experiments on MNIST \cite{mnist} and Office \cite{office} datasets show state of the art results outperforming all existing methods by a substantial margin.
+To summarize, our main contribution is to formulate joint optimization framework where we alternate between inferring target labels via discrete energy minimization (\textit{transduction}) and learning asymmetric transformation (\textit{adaptation}) between source and target examples. Our experiments on MNIST \cite{mnist} and Office \cite{office} datasets show state of the art results outperforming all existing methods by a substantial margin.
+
+
 
 
 \section{Method} 
