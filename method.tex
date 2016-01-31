@@ -12,7 +12,8 @@ We model our learning setting in a fully transductive setting; in other words, t
 
 \begin{equation}
 \begin{aligned}
-\min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} \\
+\min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+}  \\
+&+\lambda &&\hspace{-3mm}\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})}  \mathbf{x_i}^T \mathbf{x_j}\mathds{1}(y_i \neq y_j)\\
 &s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) \\
 &\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) 
 \end{aligned}
