@@ -87,22 +87,31 @@ Following the fully transductive evaluation, we summarize the results in Table~\
 
 Table~\ref{tab:res} suggests that our algorithm is on-par with the state of the art methods for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images. This very minor domain difference results in early saturation of accuracies for all algorithms. Moreover, since we use nearest neighbor classifier, our algorithm needs a large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm as well.
 
+\begin{figure}[ht]
+\includegraphics[width=\columnwidth]{nns.png}
+\caption{Example nearest neighbors for SVHN$\rightarrow$MNIST experiment. We show an example MNIST image and 5-NN SVHN images. Please note the large domain difference.}
+\label{fig:nn}
+\end{figure}
+
 Table~\ref{tab:res} further suggests our algorithm significantly outperforms all state-of-the-art methods when there is large domain difference like MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We hypothesize this performance is thanks to the transductive modeling. State-of-the-art algorithms like \cite{ganin15} are seeking for set of features invariant to the domains whereas we are seeking for an asymmetric similarity metric explaining both differences and similarities of two domains. In other words, instead of seeking for invariance, we seek for an equivariance. Specifically we seek for learning the exact transformation between two domains in the form of a similarity metric as well as a set of representative features.
 
-Another interesting conclusion is the asymetric performance results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different. The similar behavior exist in MNIST and SVHN domains as well. This observation validates the importance of asymetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
+Another interesting conclusion is the asymetric performance results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different. The similar behavior exist in MNIST and SVHN domains as well. This observation validates the importance of an asymetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
 
 To further study the learned representations as well as the similarity metric, we perform a series of qualitative analysis in the form of nearest neighbor analysis and tSNE\cite{tsne} plots.
 
+In Figure~\ref{fig:nn}, we visualize example target images from MNIST and their corresponding source images. First of all, both our experimental procedure and qualitative analysis suggests that MNIST and SVHN are the two domains with largest difference. Hence, we believe MNIST$\leftrightarrow$ is very challenging set-up. Moreover, our algorithm results in very accurate nearest neighbors.
+
+The difference between invariance and equivariance is more clear in the tSNE plots of the office dataset in Figure~\ref{fig:tsne}. We plot same distribution twice with different color codings in Figure~\ref{fig:tsne}. In the first row, we color code the domain and the target and in the second row we color code object classes. The first observation is the effect of adaptation on the feature function. Clearly, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain. However, target domain has no structure. This is also expected since the algorithm did not see any target image. After the adaptation, target images also gets clustered according to the object classes. As comparison, we also visualize the tSNE plot of the domain invariant features obtained with \cite{ganin15}. Clearly, it is invariant to the domain however it is not discriminative since the loss function of \cite{ganin15} does not include any term for this purpose. We also draw lines between the nearest neighbor images of source and target images. 
+
 \subsubsection{Effect of label propagation and feature learning}
-In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{our-method-no-prop}) and a variant without feature learning (noted as \emph{our-method-no-fl}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. Results are show in the Figure~\ref{fllprop}. 
-
-As the Figure~\ref{fllprop} suggests, both feature learning and label propagation is crucial for successful transduction. The feature learning has a slightly larger effect. Moreover the necessity of domain invariant features are proven to be helpful in various work\cite{ganin15, tzeng14} in the literature. We further analyze the learned features as well as the label propagation performance more qualitatively in the following sections.
-
 \begin{figure}[ht]
 \includegraphics[width=\columnwidth]{figure_1fl}
 \caption{Accuracy vs number of iterations for our-method, our-method-no-prop and our-method-no-fl. As the figure suggests the label propagation both increase the learning rate as well as the final accuracy. Moreover, the feature learning also have a significant effect on the accuracy.}
 \label{fllprop}
 \end{figure}
+In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{our-method-no-prop}) and a variant without feature learning (noted as \emph{our-method-no-fl}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. Results are show in the Figure~\ref{fllprop}.  As the Figure~\ref{fllprop} suggests, both feature learning and label propagation is crucial for successful transduction. The feature learning has a slightly larger effect.
+
+On the other hand, one interesting question is the effect of label propogation with respect to quality of the source only classifier. Clearly, when the source only classifier is accurate, label propogation has very limited effect. Hence, we re-train sub-optimal source only classifiers. Moreover, we show the performance of the over-all algorithm as well as the \emph{our-method-no-prop}. Moreover, we plot accuracy vs initialization (source only) quality in Figure~\ref{fig:init}. As figure~\ref{fig:init}, suggests the label propagation has very big when the initial classifier is not accurate. Moreover, overall algorithm is still accurate even when the initial source only classifier is sub-par.
 
 \begin{figure*}[ht]
     \begin{subfigure}[b]{0.5\textwidth}
@@ -112,7 +121,6 @@ As the Figure~\ref{fllprop} suggests, both feature learning and label propagatio
     \end{subfigure}~\begin{subfigure}[b]{0.5\textwidth}
         \includegraphics[width=\textwidth]{st.png}
         \caption{S. and T. with Adaptation}
-        \label{fig:gull}
     \end{subfigure}
 
     \begin{subfigure}[b]{0.5\textwidth}
@@ -122,7 +130,8 @@ As the Figure~\ref{fllprop} suggests, both feature learning and label propagatio
     \end{subfigure}~\begin{subfigure}[b]{0.5\textwidth}
         \includegraphics[width=\textwidth]{tc.png}
         \caption{Target Labels w/ Adaptation}
-        \label{fig:gull}
     \end{subfigure}
 \caption{tSNE plots for features without and with unsupervised adaptation. Please note that the discriminative behavior emerges in the unsupervised target instead of source domain. This explain the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in. Also note that our features are not invariant but the nearest neighbor arrows suggests that there is a consistent transformation, in other words our features are equivariant. }
+\label{fig:tsne}
 \end{figure*}
+
