@@ -1,24 +1,30 @@
 % !TEX root = domain_transduction.tex
+Unsupervised domain adaptation is inherently a transduction problem since the main challenge lies in labeling the unsupervised data points with the help of the supervised data. Main complication is the domain shift between the supervised and unsupervised data points which makes existing transduction methods inapplicable. We explicitly model the domain shift and jointly solve for unsupervised labels as well as the domain shift in a fully transductive setup.
+
 \subsection{Problem Definition}
-We are trying to learn the relationships between two domains of data. In our setting, one of the domains is fully supervised and has both data points as well as class labels $\{\mathbf{\hat{x}_i}, \hat{y}_i\}_{i \in [N^s]}$ such that $\mathbf{x_i}$ is the data point $i$ and $y_i$ is the corresponding label. Whereas, the other domain is unsupervised and only have data points as $\{\mathbf{x_i}\}_{i \in [N^u]}$. We further assume that there is a feature function $\Phi(\cdot)$ which is used in both of the domains.
+In unsupervised domain adaptation problem, one of the domains is fully supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \{1,\ldots, k \}$. Whereas, the other domain is unsupervised and only have $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
 
-We formulate our problem as a metric learning problem and consider an an asymmetric similarity metric;
+
+We further assume that both of the domains lie in the same space as $\xsi,\xui \in \mathcal{X}$ and there exist a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable both of the domains. We separately study the case in which features function is a parametric function \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$} with a collection of parameters $\mathbf{\theta}$ to learn.
+
+We explicitly model the domain shift in the form of a metric function and formulate our problem as a metric learning problem using an asymmetric similarity metric;
 \begin{equation}
-s(\mathbf{x_i}, \mathbf{\hat{x}_j}) = \Phi(\mathbf{x_i})^\intercal \mathbf{W} \Phi(\mathbf{\hat{x}_j})
+s(\xsi,\xuj) = \Phi(\xsi)^\intercal \mathbf{W} \Phi(\xuj)
 \end{equation}
-such that it is high if two points from supervised and unsupervised domains are similar to each other.
+such that it is high if two data points $\xsj$ from the supervised and $\xui$ from the unsupervised domain are from the same class.
 
-We model our learning setting in a fully transductive setting; in other words, the main purpose of the method is recovering the labels $y_i$ for each unsupervised example $\mathbf{x_i}$. We consider the following objective function in order to compute $y_i$ as well as the similarity metric $\mathbf{W}$.
+We model our learning setting in a fully transductive setting; in other words, the main purpose of the method is recovering the labels $\yui$ for each unsupervised example $\xui$. We consider the following objective function in order to compute $y_i$ as well as the similarity metric $\mathbf{W}$.
 
 \begin{equation}
 \begin{aligned}
-\min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[s(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - s(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+}  \\
-&+\lambda &&\hspace{-3mm}\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})}  \mathbf{x_i}^T \mathbf{x_j}\mathds{1}(y_i \neq y_j)\\
-&s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) \\
-&\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x_i}},\mathbf{x_{j}}) 
+\min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[s(\xsi,\mathbf{x}_{i^-}) - s(\xsi,\mathbf{x}_{i^+}) + \alpha]_{+}  \\
+&+\lambda &&\hspace{-3mm}\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\xsi)}  \xui^\intercal \xuj \mathds{1}(y_i \neq y_j)\\
+&s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} s(\mathbf{\hat{x}}_i,\mathbf{x}_{j}) \\
+&\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} s(\mathbf{\hat{x}}_i,\mathbf{x}_{j}) 
 \end{aligned}
 \label{loss}
 \end{equation}
+where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise and $[a]_+$ is a rectifier function which is equal to $\max(0, a)$. This construction is based on the triplet loss defined in \cite{lmnn} with transduction extension. Main rational behind the triplet loss is choosing a set of triplets in the form of an achor, positive and negative data points. It further enforces a margin $\alpha$ between the similarity of positive datapoint to anchor and the similarity of negative datapoint to the anchor. We also introduce a label consistency term which enforces that similar unsupervised data points should have same label. One important aspect of our construction is choosing the anchor data points strictly from supervised set and we discuss it in detail in Section~\ref{metric}.
 
 We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$ and the similarity metric $\mathbf{W}$. We explain these two steps the following sections.
 
