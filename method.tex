@@ -19,7 +19,7 @@ We model our learning setting in a fully transductive setting; in other words, t
 \begin{aligned}
 \min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[\sw(\xsi,\mathbf{x}_{i^-}) - \sw(\xsi,\mathbf{x}_{i^+}) + \alpha]_{+}  \\
 &+\lambda &&\hspace{-3mm}\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\xsi)}  \xui^\intercal \xuj \mathds{1}(y_i \neq y_j)\\
-&s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \mathbf{\hat{x}}_i,\mathbf{x}_{j}) \\
+&s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{j}) \\
 &\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{j}) 
 \end{aligned}
 \label{loss}
