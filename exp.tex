@@ -52,6 +52,8 @@ In order to experiment our algorithm on the task of digit classification, we use
 
 On the other hand, we use Office\cite{office} dataset in order to evaluate our algorithm on the task of object recognition. Office dataset includes images of the same objects taken directly from Amazon, captured with a low-resolution webcam and captured with a D-SLR camera. Notable differences of these domains include the white background of Amazon images vs realistic backgrounds of webcam and D-SLR images, and the resolution difference of webcam and D-SLR. Office dataset have rather fewer number of images as maximum 2478 images per domain. On the other hand, it has larger number of classes since there are 31 object categories.
 
+
+
 \subsection{Baselines}
 We compare our method with variety of algorithms both using and not using feature learning. Considering the two different lines of work, \textbf{SA*}\cite{fernando13} is the dominant state-of-the-art approach not employing any feature learning on other hand \textbf{Backprop(BP)}\cite{ganin15} is the dominant state-of-the-art approach employing feature learning. We use the available source code of \cite{ganin15} and \cite{fernando13} and following the evaluation procedure in \cite{ganin15}, we choose the hyper-parameter of \cite{fernando13} as the highest performing one among various alternatives. In addition to the baselines, we also compare our method with various self-baselines. The most important one is the \textbf{source only} baseline which is a convolutional neural network trained only using the source code. This classifier is clearly different from our nearest neighbor classifier; however, we experimentally validated that CNN always outperformed the nearest neighbor based classifier. Hence, we report the highest performing source only method in our results.
 
@@ -73,8 +75,6 @@ where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU a
 
 Since the office dataset is quite small, we do not learn the full network for office experiments and instead we only optimize for fully connected layers initializing with the weights pre-trained on ImageNet. Moreover, in all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent in order to learn the feature function as well as the similarity metric with AdaGrad\cite{adagrad}. We initialize all variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $256$. 
 
-
-
 We further share our learned models as well as the source code using TensorFlow\cite{tensorflow} on \url{http://anonymous.xyz}
 
 
@@ -82,10 +82,28 @@ We further share our learned models as well as the source code using TensorFlow\
 We evaluate all algorithms in fully transductive setup following the standard evaluation setup of \cite{office}.  We feed training images and labels of the first domain as the source and feed training images of the second domain as the target. We further evaluate the accuracy on the target domain labels as the ratio of correctly labeled images to all target images. In order to evaluate our algorithm fairly, we first use cross-validation to decide on the margin $\alpha$ and label propagation tradeoff $\lambda$. 
 
 
+
 \subsection{Results}
 Following the fully transductive evaluation, we summarize the results in Table~\ref{tab:res} and Table~\ref{tab:res2}. Table~\ref{tab:res} summarizes the experimental results on the object recognition experiment using office dataset whereas  table~\ref{tab:res2} summarizes the digit classification experiments on MNIST and SVHN.
 
 Table~\ref{tab:res} suggests that our algorithm is on-par with the state of the art methods for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images and the minor domain difference results in saturation of accuracies for all algorithms. Moreover, since we use nearest neighbor classifier, our algorithm needs a large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm as well.
+
+Table~\ref{tab:res} further suggests our algorithm significantly outperforms all state-of-the-art methods when there is a large domain difference like MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We hypothesize this performance is because of the transductive modeling. State-of-the-art algorithms like \cite{ganin15} are seeking for set of features invariant to the domains whereas we are seeking for an eplicit similarity metric explaining both differences and similarities of domains. In other words, instead of seeking for an invariance, we seek for an equivariance.
+
+Another interesting conclusion is the asymmetric nature of the accuracy results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different. The similar behavior exist in MNIST and SVHN domains as well. This observation validates the importance of an asymmetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
+
+\begin{figure}[ht]
+\includegraphics[width=\columnwidth]{no_feature_propogation}
+\caption{Accuracy vs number of iterations for our-method and its variant without label propagation as well as the variant without feature learning. As the figure suggests the label propagation both increase the stability of the gradients as well as the final accuracy. Moreover, the feature learning also have a significant effect on the accuracy.}
+\label{fllprop}
+\end{figure}
+
+\subsubsection{Qualitative Analysis}
+To further study the learned representations as well as the similarity metric, we perform a series of qualitative analysis in the form of nearest neighbor analysis and tSNE\cite{tsne} plots.
+
+In Figure~\ref{fig:nn}, we visualize example target images from MNIST and their corresponding source images. First of all, both our experimental procedure and qualitative analysis suggests that MNIST and SVHN are the two domains with largest difference. Hence, we believe MNIST$\leftrightarrow$ is very challenging set-up. Moreover, our algorithm results in very accurate nearest neighbors.
+
+In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam and their corresponding nearest source images from Amazon. The accuracy of the domain adaptation is also visible in this task. Please also note that the accuracy significantly degrades after the first few nearest neighbor which is also expected since we are only enforcing nearest datapoint to have the same label.
 
 \begin{figure}[ht]
 \begin{small}
@@ -101,30 +119,12 @@ Table~\ref{tab:res} suggests that our algorithm is on-par with the state of the 
 \end{small}
 \end{figure}
 
-Table~\ref{tab:res} further suggests our algorithm significantly outperforms all state-of-the-art methods when there is a large domain difference like MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We hypothesize this performance is because of the transductive modeling. State-of-the-art algorithms like \cite{ganin15} are seeking for set of features invariant to the domains whereas we are seeking for an eplicit similarity metric explaining both differences and similarities of domains. In other words, instead of seeking for an invariance, we seek for an equivariance.
-
-
-
-Another interesting conclusion is the asymmetric nature of the accuracy results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different. The similar behavior exist in MNIST and SVHN domains as well. This observation validates the importance of an asymmetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
-
-\subsubsection{Qualitative Analysis}
-To further study the learned representations as well as the similarity metric, we perform a series of qualitative analysis in the form of nearest neighbor analysis and tSNE\cite{tsne} plots.
-
-In Figure~\ref{fig:nn}, we visualize example target images from MNIST and their corresponding source images. First of all, both our experimental procedure and qualitative analysis suggests that MNIST and SVHN are the two domains with largest difference. Hence, we believe MNIST$\leftrightarrow$ is very challenging set-up. Moreover, our algorithm results in very accurate nearest neighbors.
-
-In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam and their corresponding nearest source images from Amazon. The accuracy of the domain adaptation is also visible in this task. Please also note that the accuracy significantly degrades after the first few nearest neighbor which is also expected since we are only enforcing nearest datapoint to have the same label.
-
 The difference between invariance and equivariance is more clear in the tSNE plots of the office dataset in Figure~\ref{fig:tsne}. We plot same distribution twice with different color codings in Figure~\ref{fig:tsne}. In the first row, we color code the domain and the target and in the second row we color code object classes. The first observation is the effect of adaptation on the feature function. We specifically try to answer questions how invariant and equivariant is the learned feature function. As the first row of the figure suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain has no structure. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also gets clustered according to the object classes. This discriminative features only arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, out similarity metric explicitly models the relationship between the domains and results in equivariant model. We also draw lines between the nearest neighbor images of source and target images in order to show this consistent metric function.
 
-\subsubsection{Effect of label propagation and feature learning}
-\begin{figure}[ht]
-\includegraphics[width=\columnwidth]{figure_1fl}
-\caption{Accuracy vs number of iterations for our-method, our-method-no-prop and our-method-no-fl. As the figure suggests the label propagation both increase the learning rate as well as the final accuracy. Moreover, the feature learning also have a significant effect on the accuracy.}
-\label{fllprop}
-\end{figure}
-In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{our-method-no-prop}) and a variant without feature learning (noted as \emph{our-method-no-fl}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. Results are show in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. 
+\subsubsection{Label propagation \& feature learning}
+In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{No Label Propogation}) and a variant without feature learning (noted as \emph{Ne Feature Learning}). We plot the transductive accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. 
 
-On the other hand, one interesting question is the effect of label propogation with respect to quality of the source only classifier. Clearly, when the source only classifier is accurate, label propogation has very limited effect. Hence, we re-train sub-optimal source only classifiers. Moreover, we show the performance of the over-all algorithm as well as the \emph{our-method-no-prop}. Moreover, we plot accuracy vs initialization (source only) quality in Figure~\ref{fig:init}. As figure~\ref{fig:init}, suggests the label propagation has significant effect when the initial classifier is not accurate. Moreover, overall algorithm is still accurate even when the initial source only classifier is sub-par until some level of noise.
+Results are show in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. Moreover, this is also expected since without label propagation, labeling stage will have more mis-classifications and they will decrease the accuracy of the metric function..
 
 \begin{figure*}[ht]
     \begin{subfigure}[b]{0.5\textwidth}
