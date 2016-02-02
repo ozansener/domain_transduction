@@ -88,18 +88,22 @@ Following the fully transductive evaluation, we summarize the results in Table~\
 Table~\ref{tab:res} suggests that our algorithm is on-par with the state of the art methods for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images and the minor domain difference results in saturation of accuracies for all algorithms. Moreover, since we use nearest neighbor classifier, our algorithm needs a large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm as well.
 
 \begin{figure}[ht]
+\begin{small}
 \includegraphics[width=\columnwidth]{digit_nn.png}
+\vspace{-5mm}
 \caption{Example nearest neighbors for SVHN$\rightarrow$MNIST experiment. We show an example MNIST image and 5-NN SVHN images. Please note the large domain difference.}
 \label{fig:nn}
+%\end{figure}
+%\begin{figure}[ht]
+\includegraphics[width=\columnwidth]{nnfi-01.png}
+\caption{Example nearest neighbors for Amazon$\leftrightarrow$Webcam experiment. We show an example source image and 3-NN target images. The drop of the accuracy after the nearest neighbors is expected since our loss function only models the nearest one.}
+\label{fig:nnoffice}
+\end{small}
 \end{figure}
 
 Table~\ref{tab:res} further suggests our algorithm significantly outperforms all state-of-the-art methods when there is a large domain difference like MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We hypothesize this performance is because of the transductive modeling. State-of-the-art algorithms like \cite{ganin15} are seeking for set of features invariant to the domains whereas we are seeking for an eplicit similarity metric explaining both differences and similarities of domains. In other words, instead of seeking for an invariance, we seek for an equivariance.
 
-\begin{figure}[ht]
-\includegraphics[width=\columnwidth]{office_nn.png}
-\caption{Example nearest neighbors for Amazon$\rightarrow$Webcam experiment. We show an example webcam image and 5-NN Amazon images. The drop of the accuracy after a few nearest neighbors is expected since our loss function only depends on the nearest examples.}
-\label{fig:nnoffice}
-\end{figure}
+
 
 Another interesting conclusion is the asymmetric nature of the accuracy results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different. The similar behavior exist in MNIST and SVHN domains as well. This observation validates the importance of an asymmetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
 
