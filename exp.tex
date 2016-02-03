@@ -119,32 +119,42 @@ In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam an
 \end{small}
 \end{figure}
 
-The difference between invariance and equivariance is more clear in the tSNE plots of the office dataset in Figure~\ref{fig:tsne}. We plot same distribution twice with different color codings in Figure~\ref{fig:tsne}. In the first row, we color code the domain and the target and in the second row we color code object classes. The first observation is the effect of adaptation on the feature function. We specifically try to answer questions how invariant and equivariant is the learned feature function. As the first row of the figure suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain has no structure. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also gets clustered according to the object classes. This discriminative features only arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, out similarity metric explicitly models the relationship between the domains and results in equivariant model. We also draw lines between the nearest neighbor images of source and target images in order to show this consistent metric function.
+The difference between invariance and equivariance is more clear in the tSNE plots of the office dataset in Figure~\ref{fig:tsne} as well as digit classification task Figure~\ref{fig:tsnedigit}. We plot same distribution twice with different color codings in Figure~\ref{fig:tsne}. In the first row, we color code each class both in source and target domains as well as before and after adaptation. As the first row of the figure suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain has no structure. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also gets clustered according to the object classes. This discriminative features only arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, out similarity metric explicitly models the relationship between the domains and results in equivariant model. We also draw lines between the nearest neighbor images of source and target images in order to show this consistent metric function. In Figure~\ref{fig:tsnedigit}, we also draw the images as well as the nearest neighbors between source and target. We see the discriminative behavior more distinctly in the digit classification experiment. The nearest neighbors are also quite accurate conforming the quantitative analysis. 
+
+
 
 \subsubsection{Label propagation \& feature learning}
 In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{No Label Propogation}) and a variant without feature learning (noted as \emph{Ne Feature Learning}). We plot the transductive accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. 
 
-Results are show in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. Moreover, this is also expected since without label propagation, labeling stage will have more mis-classifications and they will decrease the accuracy of the metric function..
+Results are shown in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. Moreover, this is also expected since without label propagation, labeling stage will have more mis-classifications and they will decrease the accuracy of the metric function..
 
 \begin{figure*}[ht]
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{na_st.png}
-        \caption{S. and T. w/o Adaptation}
+   \vspace{-2mm}
+    \begin{subfigure}[b]{0.25\textwidth}
+        \includegraphics[width=\textwidth]{before_c_s_c}
+        \caption{S. w/o Adaptation}
         \label{fig:gull}
-    \end{subfigure}~\begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{st.png}
-        \caption{S. and T. with Adaptation}
-    \end{subfigure}
-
-    \begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{sc.png}
-        \caption{Source Labels w/ Adaptation}
+    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
+        \includegraphics[width=\textwidth]{after_c_s_c}
+        \caption{S. with Adaptation}
+    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
+        \includegraphics[width=\textwidth]{before_c_t_c}
+        \caption{T w/o Adaptation}
         \label{fig:gull}
-    \end{subfigure}~\begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{tc.png}
-        \caption{Target Labels w/ Adaptation}
+    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
+        \includegraphics[width=\textwidth]{after_c_t_c}
+        \caption{T with Adaptation}
     \end{subfigure}
-\caption{tSNE plots for features without and with unsupervised adaptation. Please note that the discriminative behavior emerges in the unsupervised target instead of source domain. This explain the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in. Also note that our features are not invariant but the nearest neighbor arrows suggests that there is a consistent transformation, in other words our features are equivariant. }
+    \vspace{-5mm}
+    \caption{tSNE plots for office dataset Webcam$\rightarrow$Amazon. Source features were discriminative and stayed discriminative as expected. On the other hand, target features became quite discriminative after the adaptation.}
+    \label{fig:tsne}
+    \begin{subfigure}[b]{\textwidth}
+        \includegraphics[width=\textwidth]{out_im.png}
+        \vspace{-5mm}
+        \caption{SVHN $\rightarrow$ MNIST Embeddings}
+        \label{fig:tsnedigit}
+    \end{subfigure}
+    
+\caption{tSNE plot for SVHN$\rightarrow$MNIST experiment. Please note that the discriminative behavior only emerges in the unsupervised target instead of source domain. This explain the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in.  }
 \label{fig:tsne}
 \end{figure*}
-
