@@ -1,37 +1,39 @@
 % !TEX root = domain_transduction.tex
-Unsupervised domain adaptation is inherently a transduction problem since the main challenge lies in labeling the unsupervised data points with the help of the supervised data. Main complication is the domain shift between the supervised and unsupervised data points which makes existing transduction methods inapplicable. We explicitly model the domain shift and jointly solve for unsupervised labels as well as the domain shift in a fully transductive setup.
+Unsupervised domain adaptation is inherently a transduction problem since the main challenge lies in labeling the unsupervised data points with the help of the supervised data. Main complication is the domain shift between the supervised and unsupervised data points which makes existing transduction methods inapplicable. We explicitly model the domain shift and jointly solve for unsupervised labels as well as the domain shift in a transductive setup.
 
 \subsection{Problem Definition}
-In unsupervised domain adaptation problem, one of the domains(source) is fully supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \{1,\ldots, k \}$. Whereas, the other domain (target) is unsupervised and only have $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
+In the unsupervised domain adaptation problem, one of the domains (source) is fully supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \{1,\ldots, k \}$. Whereas, the other domain (target) is unsupervised and only has $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
 
+We further assume that both domains lie in the same space as $\xsi,\xui \in \mathcal{X}$ and there exists a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable to both. We further study the case where the feature function is parametric with a parameter $\mathbf{\theta}$ defined as \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$}, and we develop a method to learn the parameters.
 
-We further assume that both of the domains lie in the same space as $\xsi,\xui \in \mathcal{X}$ and there exist a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable both of the domains. We further study the case in which feature function is parametric with collection of parameters $\mathbf{\theta}$ as \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$}, and develop a method to learn the parameters.
+Our problem definition has two main components; transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points given adaptation and the adaptation is the sub-problem of aligning domains given the labelling. 
 
-
-We formulate our adaptation problem as an instance of metric learning by explicitly modellng domain shift in the form of an asymmetric similarity metric;
+For adaptation, we explicitly model the domain shift in the form of an asymmetric similarity as
 \begin{equation}
 \sw(\xsi,\xuj) = \Phi(\xsi)^\intercal \mathbf{W} \Phi(\xuj)
 \end{equation}
-such that it is high if two data points; $\xsj$ from the source and $\xui$ from the target domain are from the same class.
+such that it is high if two data points, $\xsj$ from the source and $\xui$ from the target, are from the same class.
 
-We further model our transduction in the form of a nearest neighbor and define the following optimization problem over the target labels $\yui$ and the similarity metric $\mathbf{W}$ in order to jointly solve transduction and adaptation.
+We further model our transduction in the form of a nearest neighbor and we follow the triplet loss defined in \cite{lmnn} in order to solve adaptation by taking the nearest neighbor inference into learning. While the original triplet loss \cite{lmnn} enforces a margin $\alpha$ between the similarity of any point to its nearest neighbor from the same class and the nearest neighbor from other classes, we extend this construction to the unsupervised domain adaptation by enforcing a similar margin. For each source point, we enforce a margin between its similarity to the nearest neighbor from the target having the same label and having a different label as; $ \sw(\xsi,\mathbf{x}_{i^+}) > \sw(\xsi,\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class to the $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class.
 
+Since we model our problem as transduction, we include target labels as part of the joint learning and introduce a target label consistency term as well. We enforce that similar unsupervised data points should have the same label after the transduction by penalizing label disagreements between similar images.
+
+Our model leads to the following optimization problem, over the target labels $\yui$ and the similarity metric $\mathbf{W}$, jointly solving transduction and adaptation. 
+ 
+ 
 \begin{equation}
 \begin{aligned}
 \min_{\mathbf{W}, y_i} &\sum_{i \in [N^s]} &&[\sw(\xsi,\mathbf{x}_{i^-}) - \sw(\xsi,\mathbf{x}_{i^+}) + \alpha]_{+}  \\
-&+\lambda &&\hspace{-3mm}\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\xui)}  \xui^\intercal \xuj \mathds{1}(y_i \neq y_j)\\
+&+\lambda &&\hspace{-3mm}\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\xui)}  sim(\xui, \xuj) \mathds{1}(y_i \neq y_j)\\
+% \Phi(\xui)^\intercal \Phi(\xuj) \mathds{1}(y_i \neq y_j)\\
 &s.t. \quad &&i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{j}) \\
 &\quad &&i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i} \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{j}) 
 \end{aligned}
 \label{loss}
 \end{equation}
-where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise and $[a]_+$ is a rectifier function which is equal to $\max(0, a)$. 
+where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise and $[a]_+$ is a rectifier function which is equal to $\max(0, a)$ and $sim$ is any similarity function in which we use cosine similarity as $sim(\xui, \xuj)= \frac{\Phi(\xui)^\intercal \Phi(\xuj)}{|\xui||\xuj|}$. 
 
-Our construction is based on the triplet loss defined in \cite{lmnn}. While original triplet loss \cite{lmnn} enforces a margin $\alpha$ between the similarity of any point to its nearest neighbor from the same class and the nearest neighbor from other classes, we extend this construction to the unsupervised domain adaptation by enforcing a similar margin. For each source point, we enforce a margin between its similarity to the nearest neighbor from the source having the same label and having a different label. We discuss this construction in detail in Section~\ref{metric}.
-
-We further introduce a label consistency term in order to enforce consistency over the transduction. In other words, we enforce that similar unsupervised data points should have the same label after the transduction. 
-
-We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\mathbf{W}$(adaptation). We explain these two steps in detail in the following sections.
+We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\mathbf{W}$ (adaptation). We explain these two steps in detail in the following sections.
 
  
  %} $ 
@@ -47,9 +49,9 @@ We solve this optimization problem via alternating minimization through iteratin
 \caption{\textbf{Visualization of the Label Propogation.} Consider the unsupervised point $x_1$, the  resulting label would be: $\min_{y_1}$ \mbox{$-\sw(\hat{\mathbf{x}}_1,\mathbf{x}_1)\mathds{1}(y_1=1)$} $-\sw(\hat{\mathbf{x}}_{9},\mathbf{x}_1)\mathds{1}(y_1=2) -\sw(\hat{\mathbf{x}}_{6},\mathbf{x}_3)\mathds{1}(y_3=0) + \Phi(\mathbf{x}_1)^\intercal\phi(\mathbf{x}_2)\mathds{1}(y_1 \neq y_2) +\Phi(\mathbf{x}_3)^\intercal\phi(\mathbf{x}_1)\mathds{1}(y_1 \neq y_3)$}
 \label{vis_label_prop}
 \end{figure}
-In order to label the unsupervised points, we use nearest-neighbor(NN) rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the labels. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
+In order to label the unsupervised points, we use nearest-neighbor (NN) rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the corresponding label. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
 
-Given a similarity metric $\sw(\cdot,\cdot)$, the nearest neighbor rule is;
+Given a similarity metric $\sw(\cdot,\cdot)$, the nearest neighbor rule is:
 \begin{equation}
 (y_i)^{pred} = \hat{y}_{{\arg\max}_j \sw(\mathbf{x_i}, \mathbf{\hat{x}_j})}
 \end{equation}
@@ -76,10 +78,10 @@ It is also critical that this formulation requires solving high number of neares
 \label{metric}
 Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to learn an asymmetric metric in order to minimize the loss function defined in (\ref{loss}). 
 
-The main intuition behind our formulation is to seek for a metric which can label the supervised data points correctly using the unsupervised data points and their predicted labels. In other words, we reverse the labeling direction. At this stage we already predicted a label for each unsupervised data point; hence, we can estimate a label for the supervised points using these predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric which will satisfy the margim. In other words, the goal of the adaptation stage is;
+The main intuition behind our formulation is to seek for a metric which can label the supervised data points correctly using the unsupervised data points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised data point; hence, we can estimate a label for the supervised points using these predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric which will satisfy the margin. In other words, the goal of the adaptation stage is:
 
 \begin{itemize}
-\item predicting $\hat{y}^{pred}_j$ using $\xui, \xsj, \ysj$
+\item predicting $\hat{y}^{pred}_j$ using $\xui, \xsj, \yui$
 \item learning $\sw(\cdot,\cdot)$ by penalizing  $(\hat{y}_j)^{pred} \neq \hat{y}_j$ 
 \end{itemize}
 
@@ -92,7 +94,7 @@ Fortunately, this can be jointly solved by minimizing the triplet loss defined w
 \end{aligned}
 \end{equation}
 
-We further define the loss function with regularizer using the nearest neighbors;
+We further define the loss function with regularizer using the nearest neighbors as
 \begin{equation}
 \min_{\mathbf{W}} \sum_{i \in [N^s]} [\sw(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - \sw(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} + r(\mathbf{W})
 \end{equation}
