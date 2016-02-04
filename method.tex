@@ -62,7 +62,7 @@ We use label propagation in order to enforce consistency of the predicted labels
 \begin{aligned}
 \min_{y_i}  &\sum_{i \in N^u} - \max_{\hat{y}_j=y_i}  \sw(\mathbf{\hat{x}_j},\mathbf{x}_{i}) \\
 &+ \lambda
-\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} \mathbf{x}_i^T \mathbf{x}_j\mathds{1}(y_i \neq y_j)
+\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)
 \end{aligned}
 \label{robtran}
 \end{equation}
