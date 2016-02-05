@@ -26,8 +26,8 @@ Our Method & $\mathbf{.804}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ 
 \end{center}
 \end{sc}
 \end{table*}
-
 \begin{table}[ht]
+\vspace{-2mm}
 \caption{Accuracy on the digit classification task.}
 \label{tab:res2}
 \begin{sc}
@@ -37,29 +37,31 @@ Our Method & $\mathbf{.804}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ 
 Source & M-M & MNIST  & SVHN & MNIST \\
 Target&  MNIST & M-M & MNIST & SVHN\\
  \midrule
-SA* \cite{fernando13}&  & $.569$ & $.593$ & \\
+SA* \cite{fernando13}& $.523$ & $.569$ & $.593$ & $.211$ \\
 BP \cite{ganin15} &$.732$ & $.766$ & $.738$ & $.289$ \\
 \midrule
-Source Only  & $.483$ & $.522$  &.549 &\\
+Source Only  & $.483$ & $.522$  &.549 & $.162$  \\
 Our Method & $\mathbf{.835}$ & $\mathbf{.855}$ & $\mathbf{.774}$ & $\mathbf{.323}$\\
  \bottomrule
 \end{tabular}}
 \end{small}
 \end{sc}
+\vspace{-7mm}
 \end{table}
-\subsection{Dataset}
-In order to experiment our algorithm on the task of digit classification, we use MNIST\cite{mnist}, Street View House Number\cite{svhn} and artificailly generated version of MNIST which is MNIST-M\cite{ganin15}. MNIST-M is a simply a blend of the digit images of the original MNIST dataset and the color images of BSDS500\cite{bsds500} following the method explained in \cite{ganin15}. Since the dataset is not distributed directly by the authors, we generated the dataset using the same procedure and further confirmed that the performance is similar to the one reported in \cite{ganin15}. Street view house numbers dataset is a collection of house numbers collected directly from Google street view images. All these three domains are quite different from each other and among many important differences,most significant ones are MNIST being grayscale and the others being colored, and SVHN images having extra confusing digits around the centered digit of interest. Moreover, all three of these domains are large-scale having at least 60k examples over 10 classes. 
 
-We use Office\cite{office} dataset in order to evaluate our algorithm on the task of object recognition. Office dataset includes images of the same objects taken directly from Amazon, captured with a low-resolution webcam and captured with a D-SLR camera. Notable differences of these domains include the white background of Amazon images vs realistic backgrounds of webcam and D-SLR images, and the resolution difference of webcam and D-SLR. Office dataset have rather fewer number of images as maximum 2478 images per domain. On the other hand, it has larger number of classes over 31 object categories.
+\subsection{Dataset}
+We use MNIST\cite{mnist}, Street View House Number\cite{svhn} and artificailly generated version of MNIST -MNIST-M- \cite{ganin15} to experiment our algorithm on the digit classification task. MNIST-M is a simply a blend of the digit images of the original MNIST dataset and the color images of BSDS500\cite{bsds500} following the method explained in \cite{ganin15}. Since the dataset is not distributed directly by the authors, we generated the dataset using the same procedure and further confirmed that the performance is same as the one reported in \cite{ganin15}. Street view house numbers dataset is a collection of house numbers collected directly from Google street view images. All these three domains are quite different from each other and among many important differences,most significant ones are MNIST being grayscale and the others being colored, and SVHN images having extra confusing digits around the centered digit of interest. Moreover, all three domains are large-scale having at least 60k examples over 10 classes. 
+
+In addition, we use Office\cite{office} dataset to evaluate our algorithm on the object recognition task. Office dataset includes images of the same objects taken directly from Amazon, captured with a low-resolution webcam and captured with a D-SLR camera. Notable differences of these domains include the white background of Amazon images vs realistic backgrounds of webcam and D-SLR images, and the resolution difference of webcam and D-SLR. Office dataset have rather fewer number of images as maximum 2478 images per domain. On the other hand, it has larger number of classes over 31 categories.
 
 
 
 \subsection{Baselines}
-We compare our method with variety of algorithms both using and not using feature learning. Considering the two different lines of work, \textbf{SA*}\cite{fernando13} is the dominant state-of-the-art approach not employing any feature learning on other hand \textbf{Backprop(BP)}\cite{ganin15} is the dominant state-of-the-art approach employing feature learning. We use the available source code of \cite{ganin15} and \cite{fernando13} and following the evaluation procedure in \cite{ganin15}, we choose the hyper-parameter of \cite{fernando13} as the highest performing one among various alternatives. In addition to the baselines, we also compare our method with various self-baselines. The most important one is the \textbf{source only} baseline which is a convolutional neural network trained only using the source code. This classifier is clearly different from our nearest neighbor classifier; however, we experimentally validated that CNN always outperformed the nearest neighbor based classifier. Hence, we report the highest performing source only method.
+We compare our method with variety of algorithms both with and without feature learning. Considering the two different lines of work, \textbf{SA*}\cite{fernando13} is the dominant state-of-the-art approach not employing any feature learning on other hand \textbf{Backprop(BP)}\cite{ganin15} is the dominant state-of-the-art approach employing feature learning. We use the available source code of \cite{ganin15} and \cite{fernando13} and following the evaluation procedure in \cite{ganin15}, we choose the hyper-parameter of \cite{fernando13} as the highest performing one among various alternatives. In addition to the baselines, we also compare our method with various self-baselines. The most important one is the \textbf{source only} baseline which is a convolutional neural network trained only using the source data. This classifier is clearly different from our nearest neighbor classifier; however, we experimentally validated that CNN always outperformed the nearest neighbor based classifier. Hence, we report the highest performing source only method.
 
 \subsection{Implementation Details}
 \label{imp_det}
-Although our algorithm have very few design parameters and we decide most of them either using cross-validation or exhaustive grid search, our algorithm uses an existing differentiable feature function. The selection of this feature function is a critical parameter for our algorithm. Following the unparalleled success of convolutional neural networks (CNNs), we use CNNs as our feature functions.  In order to have  fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains \emph{(see supplementary material for full details)}:
+Although our algorithm has very few hyper-parameters and we choose most of them either using cross-validation or exhaustive grid search, our algorithm uses an existing differentiable feature function. Following the unparalleled success of convolutional neural networks (CNNs), we use CNNs as our feature functions.  In order to have  fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains \emph{(see supplementary material for full details)}:
 
 \noindent \textbf{MNIST, MNIST-M} and \textbf{SVHN:} Modified LeNet\cite{lenet} as;
 
@@ -73,24 +75,22 @@ Although our algorithm have very few design parameters and we decide most of the
 
 where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU and \textbf{F} is fully connected layer. 
 
-Since the office dataset is quite small, we do not learn the full network for office experiments and instead we only optimize for fully connected layers initializing with the weights pre-trained on ImageNet. Moreover, in all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent in order to learn the feature function as well as the similarity metric with AdaGrad\cite{adagrad}. We initialize all variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $256$. 
-
-We further share our learned models as well as the source code using TensorFlow\cite{tensorflow} on \url{http://anonymous.xyz}
-
+Since the office dataset is quite small, we do not learn the full network for office experiments and instead we only optimize for fully connected layers initializing with the weights pre-trained on ImageNet. Moreover, in all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent to learn the feature function as well as the similarity metric with AdaGrad\cite{adagrad}. We initialize variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $256$. 
 
 \subsection{Evaluation Procedure}
-We evaluate all algorithms in fully transductive setup following the standard evaluation setup of \cite{office}.  We feed training images and labels of the first domain as the source and feed training images of the second domain as the target. We further evaluate the accuracy on the target domain labels as the ratio of correctly labeled images to all target images. In order to evaluate our algorithm fairly, we first use cross-validation to decide on the margin $\alpha$ and label propagation tradeoff $\lambda$. 
-
+We evaluate all algorithms in fully transductive setup following the standard evaluation setup of \cite{office}.  We feed training images and labels of the first domain as the source and feed training images of the second domain as the target. We further evaluate the accuracy on the target domain labels as the ratio of correctly labeled images to all target images.
 
 
 \subsection{Results}
 Following the fully transductive evaluation, we summarize the results in Table~\ref{tab:res} and Table~\ref{tab:res2}. Table~\ref{tab:res} summarizes the experimental results on the object recognition experiment using office dataset whereas  table~\ref{tab:res2} summarizes the digit classification experiments on MNIST and SVHN.
 
-Table~\ref{tab:res} suggests that our algorithm is on-par with the state of the art methods for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images and the minor domain difference results in saturation of accuracies for all algorithms. Moreover, since we use nearest neighbor classifier, our algorithm needs a large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm as well.
+Table~\ref{tab:res}\&\ref{tab:res2} shows results on object recognition and digit classification tasks exhaustively covering all adaptation scenarios. Our algorithm shows state-of-the-art performance in all experiments. Moreover, our algorithm significantly outperforms all state-of-the-art methods when there is a large domain difference like MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We hypothesize this performance is because of the transductive modeling. State-of-the-art algorithms like \cite{ganin15} are seeking for set of features invariant to the domains whereas we are seeking for an explicit similarity metric explaining both differences and similarities of domains. In other words, instead of seeking for an invariance, we seek for an equivariance.
 
-Table~\ref{tab:res} further suggests our algorithm significantly outperforms all state-of-the-art methods when there is a large domain difference like MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. We hypothesize this performance is because of the transductive modeling. State-of-the-art algorithms like \cite{ganin15} are seeking for set of features invariant to the domains whereas we are seeking for an eplicit similarity metric explaining both differences and similarities of domains. In other words, instead of seeking for an invariance, we seek for an equivariance.
+Table~\ref{tab:res} suggests that accuracy of our algorithm is limited  for D-SLR$\leftrightarrow$Webcam experiments. This is rather expected since the domain difference is very minor between D-SLR and webcam images and the minor domain difference results in saturation of accuracies for all algorithms. Moreover, since we use nearest neighbor classifier, our algorithm needs a large-dataset to be successful. Both webcam and D-SLR datasets are rather small (300to700 examples) which limits the accuracy of nearest neighbor algorithm as well.
 
-Another interesting conclusion is the asymmetric nature of the accuracy results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different. The similar behavior exist in MNIST and SVHN domains as well. This observation validates the importance of an asymmetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
+Table~\ref{tab:res2} further suggests our algorithm is the only one which can generalize well from MNIST to SVHN dataset. We believe this is thanks to the feature learning in transductive setup. Clearly the features which are learned from MNIST can not generalize to SVHN since the SVHN has concepts like color and occlusion which are not available in MNIST. Hence, our algorithm learns SVHN specific features by enforcing accurate transduction in adaptation stage.
+
+Another interesting conclusion is the asymmetric nature of the results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different in Table~\ref{tab:res}. The similar behavior exist in MNIST and SVHN domains as well in Table~\ref{tab:res}. This observation validates the importance of an asymmetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
 
 \begin{figure}[ht]
 \includegraphics[width=\columnwidth]{no_feature_propogation}
@@ -101,9 +101,9 @@ Another interesting conclusion is the asymmetric nature of the accuracy results.
 \subsubsection{Qualitative Analysis}
 To further study the learned representations as well as the similarity metric, we perform a series of qualitative analysis in the form of nearest neighbor analysis and tSNE\cite{tsne} plots.
 
-In Figure~\ref{fig:nn}, we visualize example target images from MNIST and their corresponding source images. First of all, both our experimental procedure and qualitative analysis suggests that MNIST and SVHN are the two domains with largest difference. Hence, we believe MNIST$\leftrightarrow$ is very challenging set-up. Moreover, our algorithm results in very accurate nearest neighbors.
+In Figure~\ref{fig:nn}, we visualize example target images from MNIST and their corresponding source images. First of all, both our experimental procedure and qualitative analysis suggests that MNIST and SVHN are the two domains with largest difference. Hence, we believe MNIST$\leftrightarrow$ is very challenging set-up. Despite the huge visual differences between MNIST and SVHN images, our algorithm results in accurate nearest neighbors.
 
-In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam and their corresponding nearest source images from Amazon. The accuracy of the domain adaptation is also visible in this task. Please also note that the accuracy significantly degrades after the first few nearest neighbor which is also expected since we are only enforcing nearest datapoint to have the same label.
+In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam and their corresponding nearest source images from Amazon. The accuracy of the domain adaptation is also visible in this task. 
 
 \begin{figure}[ht]
 \begin{small}
@@ -119,14 +119,12 @@ In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam an
 \end{small}
 \end{figure}
 
-The difference between invariance and equivariance is more clear in the tSNE plots of the office dataset in Figure~\ref{fig:tsne} as well as digit classification task Figure~\ref{fig:tsnedigit}. We plot same distribution twice with different color codings in Figure~\ref{fig:tsne}. In the first row, we color code each class both in source and target domains as well as before and after adaptation. As the first row of the figure suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain has no structure. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also gets clustered according to the object classes. This discriminative features only arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, out similarity metric explicitly models the relationship between the domains and results in equivariant model. We also draw lines between the nearest neighbor images of source and target images in order to show this consistent metric function. In Figure~\ref{fig:tsnedigit}, we also draw the images as well as the nearest neighbors between source and target. We see the discriminative behavior more distinctly in the digit classification experiment. The nearest neighbors are also quite accurate conforming the quantitative analysis. 
+The difference between invariance and equivariance is more clear in the tSNE plots of the office dataset in Figure~\ref{fig:tsne} as well as digit classification task Figure~\ref{fig:tsnedigit}. In Figure~\ref{fig:tsne}, we plot the distribution of features before and after adaptation for source and target while color coding class labels. As the Figure~\ref{fig:tsne} suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain features have no structure before adaptation. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also gets clustered according to the object classes. 
 
-
+In Figure~\ref{fig:tsnedigit}, we show the digit images of source and target domains after the adaptation. Clearly target is well clustered according to the classes and source is not very well clustered although it has some structure. Since we learn the entire network for digit classification, our networks learn discriminative features in target domain as our loss depends directly on classification score in target domain. Moreover, discriminative features in target only arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, our similarity metric explicitly models the relationship between the domains and results in equivariant model while enforcing discriminative behavior in target. We also draw lines between the nearest neighbor images of source and target images in order to show the accuracy of the metric function. Moreover, the nearest neighbors are quite accurate conforming the quantitative analysis. 
 
 \subsubsection{Label propagation \& feature learning}
-In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method with a variant without the label propagation (noted as \emph{No Label Propogation}) and a variant without feature learning (noted as \emph{Ne Feature Learning}). We plot the transductive accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity. 
-
-Results are shown in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. Moreover, this is also expected since without label propagation, labeling stage will have more mis-classifications and they will decrease the accuracy of the metric function..
+In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method without the label propagation (noted as \emph{No Label Propogation}) and without feature learning (noted as \emph{Ne Feature Learning}). We plot the transductive accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the resultant accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity.  Results are shown in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. Moreover, this is also expected since without label propagation, labeling stage will have more mis-classifications and they will decrease the accuracy of the metric.
 
 \begin{figure*}[ht]
    \vspace{-2mm}
@@ -146,15 +144,10 @@ Results are shown in the Figure~\ref{fllprop}, and it suggests that both feature
         \caption{T with Adaptation}
     \end{subfigure}
     \vspace{-5mm}
-    \caption{tSNE plots for office dataset Webcam$\rightarrow$Amazon. Source features were discriminative and stayed discriminative as expected. On the other hand, target features became quite discriminative after the adaptation.}
+    \caption{tSNE plots for office dataset Webcam(S)$\rightarrow$Amazon(T). Source features were discriminative and stayed discriminative as expected. On the other hand, target features became quite discriminative after the adaptation.}
     \label{fig:tsne}
-    \begin{subfigure}[b]{\textwidth}
         \includegraphics[width=\textwidth]{out_im.png}
         \vspace{-5mm}
-        \caption{SVHN $\rightarrow$ MNIST Embeddings}
-        \label{fig:tsnedigit}
-    \end{subfigure}
-    
 \caption{tSNE plot for SVHN$\rightarrow$MNIST experiment. Please note that the discriminative behavior only emerges in the unsupervised target instead of source domain. This explain the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in.  }
-\label{fig:tsne}
+\label{fig:tsnedigit}
 \end{figure*}

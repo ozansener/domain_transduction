@@ -1,7 +1,9 @@
 % !TEX root = domain_transduction.tex
-Unsupervised domain adaptation is inherently a transduction problem since the main challenge lies in labeling the unsupervised data points with the help of the supervised data; because, adaptation is done offline without computationally concerns and the accuracy is critical since the transduction error is a good proxy for generalization \cite{adapttheory}. Main complication, which makes existing transduction methods inapplicable, is the domain shift between the supervised and unsupervised data points . We explicitly model the domain shift and jointly solve for unsupervised labels as well as the domain shift in a transductive learning setup.
+We address the problem of unsupervised domain adaptation using transduction by jointly solving for the labels of unsupervised target domain as well as the domain shift between the domains. We first define our model in Section~\ref{prob:def} and explain the two sub-problems transduction and adaptation. We further explain the details of transduction in Section~\ref{label} and the details of adaptation in Section~\ref{metric}.
+%Unsupervised domain adaptation is inherently a transduction problem since the main challenge lies in labeling the unsupervised data points with the help of the supervised data; because, adaptation is done offline without computationally concerns and the accuracy is critical since the transduction error is a good proxy for generalization \cite{adapttheory}. Main complication, which makes existing transduction methods inapplicable, is the domain shift between the supervised and unsupervised data points . We explicitly model the domain shift and jointly solve for unsupervised labels as well as the domain shift in a transductive learning setup.
 
 \subsection{Problem Definition}
+\label{prob:def}
 In the unsupervised domain adaptation problem, one of the domains (source) is fully supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \{1,\ldots, k \}$. Whereas, the other domain (target) is unsupervised and only has $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
 
 We further assume that both domains lie in the same space as $\xsi,\xui \in \mathcal{X}$ and there exists a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable to both. We further study the case where the feature function is parametric with a parameter $\mathbf{\theta}$ defined as \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$}, and we develop a method to learn the parameters.
@@ -14,13 +16,11 @@ For adaptation, we explicitly model the domain shift in the form of an asymmetri
 \end{equation}
 such that it is high if two data points, $\xsj$ from the source and $\xui$ from the target, are from the same class.
 
-We further model our transduction in the form of a nearest neighbor and we follow the triplet loss defined in \cite{lmnn} in order to solve adaptation by taking the nearest neighbor inference into learning. While the original triplet loss \cite{lmnn} enforces a margin $\alpha$ between the similarity of any point to its nearest neighbor from the same class and the nearest neighbor from other classes, we extend this construction to the unsupervised domain adaptation by enforcing a similar margin. For each source point, we enforce a margin between its similarity to the nearest neighbor from the target having the same label and having a different label as; $ \sw(\xsi,\mathbf{x}_{i^+}) > \sw(\xsi,\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class to the $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class.
+We further model our transduction in the form of a nearest neighbor and we follow the triplet loss defined in \cite{lmnn} in order to solve adaptation by taking the nearest neighbor inference into learning. While the original triplet loss \cite{lmnn} enforces a margin $\alpha$ between the similarity of any point to its nearest neighbor from the same class and the nearest neighbor from other classes, we extend this construction to the unsupervised domain adaptation by enforcing a similar margin. For each source point, we enforce a margin between its similarity to the nearest neighbor from the target having the same label and having a different label as; $ \sw(\xsi,\mathbf{x}_{i^+}) > \sw(\xsi,\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class to the $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label.
 
 Since we model our problem as transduction, we include target labels as part of the joint learning and introduce a target label consistency term as well. We enforce that similar unsupervised data points should have the same label after the transduction by penalizing label disagreements between similar images.
 
 Our model leads to the following optimization problem, over the target labels $\yui$ and the similarity metric $\mathbf{W}$, jointly solving transduction and adaptation. 
- 
- 
 \begin{equation}
 \begin{aligned}
 \min_{\mathbf{W}, y_1, \ldots y_{N^u}} &\sum_{i \in [N^s]} &&[\sw(\xsi,\mathbf{x}_{i^-}) - \sw(\xsi,\mathbf{x}_{i^+}) + \alpha]_{+}  \\
@@ -49,20 +49,19 @@ We solve this optimization problem via alternating minimization through iteratin
 \caption{\textbf{Visualization of the Label Propogation.} Consider the unsupervised point $x_1$, the  resulting label would be: $\min_{y_1}$ \mbox{$-\sw(\hat{\mathbf{x}}_1,\mathbf{x}_1)\mathds{1}(y_1=1)$} $-\sw(\hat{\mathbf{x}}_{9},\mathbf{x}_1)\mathds{1}(y_1=2) -\sw(\hat{\mathbf{x}}_{6},\mathbf{x}_3)\mathds{1}(y_3=0) + \Phi(\mathbf{x}_1)^\intercal\phi(\mathbf{x}_2)\mathds{1}(y_1 \neq y_2) +\Phi(\mathbf{x}_3)^\intercal\phi(\mathbf{x}_1)\mathds{1}(y_1 \neq y_3)$}
 \label{vis_label_prop}
 \end{figure}
-In order to label the unsupervised points, we use nearest-neighbor (NN) rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the corresponding label. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
+In order to label the unsupervised points, we use the nearest-neighbor (NN) rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the corresponding label. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
 
 Given a similarity metric $\sw(\cdot,\cdot)$, the nearest neighbor rule is:
 \begin{equation}
 (y_i)^{pred} = \hat{y}_{{\arg\max}_j \sw(\mathbf{x_i}, \mathbf{\hat{x}_j})}
 \end{equation}
 
-We use label propagation in order to enforce consistency of the predicted labels of unsupervised data points. Our label propagation construction is similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}. In order to enforce this consistency, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points such that neighbor set $\mathcal{N}(\mathbf{x_i})$ for $\mathbf{x}_i$ is the k-unsupervised data point having highest similarity to $\mathbf{x_i}$ using the cosine similarity in the feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points with label propagation;
-
+We use label propagation in order to enforce consistency of the predicted labels of unsupervised data points. Our label propagation construction is similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}. In order to enforce this consistency, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points such that neighbor set $\mathcal{N}(\xui)$ for $\xui$ is the k-unsupervised data point having highest similarity to $\xui$ using the cosine similarity in the feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points with label propagation;
 \begin{equation}
 \begin{aligned}
-\min_{y_1, \ldots y_{N^u}}  &\sum_{i \in N^u} - \max_{\hat{y}_j=y_i}  \sw(\mathbf{\hat{x}_j},\mathbf{x}_{i}) \\
+\min_{y_1, \ldots y_{N^u}}  &\sum_{i \in N^u} - \max_{\hat{y}_j=y_i}  \sw(\mathbf{\hat{x}}_j,\mathbf{x}_{i}) \\
 &+ \lambda
-\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x_i})} sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)
+\sum_{i \in N^u} \sum_{j \in \mathcal{N}(\mathbf{x}_i)} sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)
 \end{aligned}
 \label{robtran}
 \end{equation}
@@ -71,14 +70,13 @@ This problem can approximately be solved using many existing methods like $\alph
 
 In order to further explain the label propagation, we visualize a sample example with $k=2$ and $3$-class classification problem in Figure~\ref{vis_label_prop}. 
 
-It is also critical that this formulation requires solving high number of nearest neighbors and it is computationally challenging. However, our choice of optimization method and parameters makes this computation tractable. We use stochastic gradient descent in our adaptation stage with a carefully chosen batch size and it requires us to only solve the transduction over a batch. Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
+It is also critical that this formulation requires solving high number of nearest neighbors and it is computationally challenging. However, our choice of optimization method and parameters makes this computation tractable. We use stochastic gradient descent in our adaptation stage with a carefully chosen batch size and it requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
 
 \subsection{Adaptation: Learning the Metric}
 \label{metric}
 Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to learn an asymmetric metric in order to minimize the loss function defined in (\ref{loss}). 
 
-The main intuition behind our formulation is to seek for a metric which can label the supervised data points correctly using the unsupervised data points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised data point; hence, we can estimate a label for the supervised points using these predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric which will satisfy the margin. In other words, the goal of the adaptation stage is:
-
+The main intuition behind our formulation is to seek for a metric which can label the supervised data points correctly using the unsupervised data points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised data point; hence, we can estimate a label for supervised point using the predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric. In other words, the goal of the adaptation stage is:
 \begin{itemize}
 \item predicting $\hat{y}^{pred}_j$ using $\xui, \xsj, \yui$
 \item learning $\sw(\cdot,\cdot)$ by penalizing  $(\hat{y}_j)^{pred} \neq \hat{y}_j$ 
@@ -95,30 +93,34 @@ Fortunately, this can be jointly solved by minimizing the triplet loss defined w
 
 We further define the loss function with regularizer using the nearest neighbors as
 \begin{equation}
-\min_{\mathbf{W}} \sum_{i \in [N^s]} [\sw(\mathbf{\hat{x_i}},\mathbf{x_{i^-}}) - \sw(\mathbf{\hat{x_i}},\mathbf{x_{i^+}}) + \alpha]_{+} + r(\mathbf{W})
+\min_{\mathbf{W}} \sum_{i \in [N^s]} [\sw(\mathbf{\hat{x}}_i,\mathbf{x}_{i^-}) - \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{i^+}) + \alpha]_{+} + r(\mathbf{W})
 \end{equation}
 which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and we optimize it via stochastic gradient descent using the subgradient \
-%\begin{small}
 \mbox{$\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} = \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}} + $}
+%\begin{small}
 \begin{equation}
-\sum_{i \in [N^s]} \mathds{1}(\sw(\xsi,\mathbf{x_{i^-}}) - \sw(\xsi,\mathbf{x_{i^+}})>\alpha) \left( \xsi\mathbf{x}^\intercal_{i^-} - \xsi \mathbf{x}^\intercal_{i^+}  \right)  
+\begin{aligned}
+\sum_{i \in [N^s]} &\mathds{1}(\sw(\xsi,\mathbf{x}_{i^-}) - \sw(\xsi,\mathbf{x}_{i^+})>\alpha) \\
+&\times \left( \Phi(\xsi)\Phi(\mathbf{x}_{i^-})^\intercal - \Phi(\xsi)\Phi(\mathbf{x}_{i^+})^\intercal  \right)  
+\end{aligned}
 \label{gradw}
 \end{equation}
 %\end{small}
+%\end{small}
 As a regularizer use the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine and how we implement in the Section~\ref{imp_det}.
 \subsection{Learning Features}
-In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggests that learning this feature function $\Phi$ directly from the data  is a promising direction especially for visual domains. Hence, we consider the case, where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
+In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggests that learning this feature function $\Phi$ from the data using neural networks is a promising direction especially for visual domains. Hence, we consider the case, where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
 
 \begin{small}
 \begin{equation}
 \begin{aligned}
- \sum_{i \in [N^s]} &\mathds{1}(\sw(\xsi,\mathbf{x_{i^-}}) - \sw(\xsi,\mathbf{x_{i^+}})>\alpha)  \\
- &\times \left(\frac{\partial \sw(\xsi,\mathbf{x_{i^-}}) }{\partial \mathbf{\Theta}} - \frac{\partial \sw(\xsi,\mathbf{x_{i^+}}) }{\partial \mathbf{\Theta}} \right)
+ \sum_{i \in [N^s]} &\mathds{1}(\sw(\xsi,\mathbf{x}_{i^-}) - \sw(\xsi,\mathbf{x}_{i^+})>\alpha)  \\
+ &\times \left(\frac{\partial \sw(\xsi,\mathbf{x}_{i^-}) }{\partial \mathbf{\theta}} - \frac{\partial \sw(\xsi,\mathbf{x}_{i^+}) }{\partial \mathbf{\theta}} \right)
  \label{gradt}
  \end{aligned}
 \end{equation}
 \end{small}
-where $\frac{\partial \sw(\xsi,\xuj) }{\partial \mathbf{\Theta}} =\xuj^\intercal \mathbf{W} \frac{\partial \phi_\mathbf{\theta}(\xsi)}{\partial \theta} + \xsi^\intercal \mathbf{W} \frac{\partial \phi_\mathbf{\theta}(\xuj)}{\partial \theta} $
+where {\small $\frac{\partial \sw(\xsi,\xuj) }{\partial \mathbf{\theta}} =\Phi(\xuj)^\intercal \mathbf{W}^\intercal \frac{\partial \phi_\mathbf{\theta}(\xsi)}{\partial \theta} + \Phi(\xsi)^\intercal \mathbf{W} \frac{\partial \phi_\mathbf{\theta}(\xuj)}{\partial \theta} $}
 
 \begin{algorithm}[tb]
    \caption{Transduction with Domain Shift}
@@ -131,11 +133,11 @@ where $\frac{\partial \sw(\xsi,\xuj) }{\partial \mathbf{\Theta}} =\xuj^\intercal
    \FOR{$i=1$ {\bfseries to} $B$}
       \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots y_B} $} 
    \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
-   \STATE Update $\frac{\partial loss}{\partial \mathbf{\Theta}}$ and  $\frac{\partial loss}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
+   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta}}$ and  $\frac{\partial loss}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
    \ENDIF
    \ENDFOR
    \STATE $\mathbf{W} \leftarrow \mathbf{W} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}}$ 
-   \STATE $\mathbf{\Theta} \leftarrow \mathbf{\Theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\Theta}}$
+   \STATE $\mathbf{\theta} \leftarrow \mathbf{\theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}}$
    \UNTIL CONVERGENCE or $MAX\_ITER$
 \end{algorithmic}
 \end{algorithm}
