@@ -2,6 +2,7 @@
 We evaluate our algorithm on various unsupervised domain adaptation tasks while focusing on two different problems, hand-written digit classification and object recognition. For each experiment, we use three domains and evaluate all adaptation scenarios.
 
 \begin{table*}[ht]
+\vspace{-3mm}
 \caption{Accuracy of our method and the state-of-the-art algorithms on Office dataset and various adaptation settings}
 \label{tab:res}
 \begin{sc}
@@ -25,6 +26,7 @@ Our Method & $\mathbf{.804}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ 
 \end{small}
 \end{center}
 \end{sc}
+\vspace{-5mm}
 \end{table*}
 \begin{table}[ht]
 \vspace{-2mm}
@@ -49,38 +51,41 @@ Our Method & $\mathbf{.835}$ & $\mathbf{.855}$ & $\mathbf{.774}$ & $\mathbf{.323
 \vspace{-7mm}
 \end{table}
 
+\vspace{-2mm}
 \subsection{Dataset}
 We use MNIST\cite{mnist}, Street View House Number\cite{svhn} and artificailly generated version of MNIST -MNIST-M- \cite{ganin15} to experiment our algorithm on the digit classification task. MNIST-M is a simply a blend of the digit images of the original MNIST dataset and the color images of BSDS500\cite{bsds500} following the method explained in \cite{ganin15}. Since the dataset is not distributed directly by the authors, we generated the dataset using the same procedure and further confirmed that the performance is same as the one reported in \cite{ganin15}. Street view house numbers dataset is a collection of house numbers collected directly from Google street view images. All these three domains are quite different from each other and among many important differences,most significant ones are MNIST being grayscale and the others being colored, and SVHN images having extra confusing digits around the centered digit of interest. Moreover, all three domains are large-scale having at least 60k examples over 10 classes. 
 
-In addition, we use Office\cite{office} dataset to evaluate our algorithm on the object recognition task. Office dataset includes images of the same objects taken directly from Amazon, captured with a low-resolution webcam and captured with a D-SLR camera. Notable differences of these domains include the white background of Amazon images vs realistic backgrounds of webcam and D-SLR images, and the resolution difference of webcam and D-SLR. Office dataset have rather fewer number of images as maximum 2478 images per domain. On the other hand, it has larger number of classes over 31 categories.
+In addition, we use Office\cite{office} dataset to evaluate our algorithm on the object recognition task. Office dataset includes images of the same objects taken from Amazon, captured with a webcam and captured with a D-SLR camera. Notable differences of domains include the white background of Amazon images vs realistic backgrounds of webcam\&D-SLR images, and the resolution difference of webcam and D-SLR. Office dataset have fewer number of images as maximum 2478 images per domain over 31 classes. %On the other hand, it has larger number of classes over 31 categories.
 
 
-
+\vspace{-2mm}
 \subsection{Baselines}
 We compare our method with variety of algorithms both with and without feature learning. Considering the two different lines of work, \textbf{SA*}\cite{fernando13} is the dominant state-of-the-art approach not employing any feature learning on other hand \textbf{Backprop(BP)}\cite{ganin15} is the dominant state-of-the-art approach employing feature learning. We use the available source code of \cite{ganin15} and \cite{fernando13} and following the evaluation procedure in \cite{ganin15}, we choose the hyper-parameter of \cite{fernando13} as the highest performing one among various alternatives. In addition to the baselines, we also compare our method with various self-baselines. The most important one is the \textbf{source only} baseline which is a convolutional neural network trained only using the source data. This classifier is clearly different from our nearest neighbor classifier; however, we experimentally validated that CNN always outperformed the nearest neighbor based classifier. Hence, we report the highest performing source only method.
 
+\vspace{-2mm}
 \subsection{Implementation Details}
 \label{imp_det}
-Although our algorithm has very few hyper-parameters and we choose most of them either using cross-validation or exhaustive grid search, our algorithm uses an existing differentiable feature function. Following the unparalleled success of convolutional neural networks (CNNs), we use CNNs as our feature functions.  In order to have  fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains \emph{(see supplementary material for full details)}:
+Although our algorithm has very few hyper-parameters and we choose most of them either using cross-validation or exhaustive grid search, our algorithm uses an existing differentiable feature function. Following the unparalleled success of convolutional neural networks (CNNs), we use CNNs as our feature functions.  In order to have  fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains:
 
-\noindent \textbf{MNIST, MNIST-M} and \textbf{SVHN:} Modified LeNet\cite{lenet} as;
+\noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as;
 
 \includegraphics[width=\columnwidth]{lenet}
 
 
-\noindent \textbf{Office:} Modified AlexNet\cite{alexnet} as;
+\noindent \textbf{Office:} AlexNet\cite{alexnet} as;
 
 \includegraphics[width=\columnwidth]{alexnet}
 
 
 where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU and \textbf{F} is fully connected layer. 
 
-Since the office dataset is quite small, we do not learn the full network for office experiments and instead we only optimize for fully connected layers initializing with the weights pre-trained on ImageNet. Moreover, in all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent to learn the feature function as well as the similarity metric with AdaGrad\cite{adagrad}. We initialize variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $256$. 
+Since the office dataset is quite small, we do not learn the full network for office experiments and instead we only optimize for fully connected layers initializing with the weights pre-trained on ImageNet. In all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent to learn the feature function as well as the similarity metric with AdaGrad\cite{adagrad}. We initialize variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $256$. 
 
+\vspace{-2mm}
 \subsection{Evaluation Procedure}
 We evaluate all algorithms in fully transductive setup following the standard evaluation setup of \cite{office}.  We feed training images and labels of the first domain as the source and feed training images of the second domain as the target. We further evaluate the accuracy on the target domain labels as the ratio of correctly labeled images to all target images.
 
-
+\vspace{-2mm}
 \subsection{Results}
 Following the fully transductive evaluation, we summarize the results in Table~\ref{tab:res} and Table~\ref{tab:res2}. Table~\ref{tab:res} summarizes the experimental results on the object recognition experiment using office dataset whereas  table~\ref{tab:res2} summarizes the digit classification experiments on MNIST and SVHN.
 
@@ -93,11 +98,14 @@ Table~\ref{tab:res2} further suggests our algorithm is the only one which can ge
 Another interesting conclusion is the asymmetric nature of the results. For example, the accuracy of adapting webcam images to amazon images and adapting amazon images to webcam images is significantly different in Table~\ref{tab:res}. The similar behavior exist in MNIST and SVHN domains as well in Table~\ref{tab:res}. This observation validates the importance of an asymmetric modeling and the limited performance of domain invariance based methods since they are symmetric by definition. 
 
 \begin{figure}[ht]
+\vspace{-1mm}
 \includegraphics[width=\columnwidth]{no_feature_propogation}
+\vspace{-6mm}
 \caption{Accuracy vs number of iterations for our-method and its variant without label propagation as well as the variant without feature learning. As the figure suggests the label propagation both increase the stability of the gradients as well as the final accuracy. Moreover, the feature learning also have a significant effect on the accuracy.}
 \label{fllprop}
 \end{figure}
 
+\vspace{-2mm}
 \subsubsection{Qualitative Analysis}
 To further study the learned representations as well as the similarity metric, we perform a series of qualitative analysis in the form of nearest neighbor analysis and tSNE\cite{tsne} plots.
 

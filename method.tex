@@ -46,6 +46,7 @@ We solve this optimization problem via alternating minimization through iteratin
 \label{label}
 \begin{figure}[ht]
 \includegraphics[width=\columnwidth]{fig11}
+\vspace{-6mm}
 \caption{\textbf{Visualization of the Label Propogation.} We create a k-NN graph of unsupervised target domain to enforce consistency with pairwise terms 
 \mbox{$\psi_{ij}=sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)$} and use closest supervised source points to each class as 
 \mbox{$ \psi_{i\hat{k}} \sw(\mathbf{\hat{x}}_k,\mathbf{x}_{i})$}.} 
@@ -53,12 +54,12 @@ We solve this optimization problem via alternating minimization through iteratin
 \end{figure}
 In order to label the unsupervised points, we use the nearest-neighbor (NN) rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the corresponding label. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
 
-Given a similarity metric $\sw(\cdot,\cdot)$, the nearest neighbor rule is:
+Given a similarity metric $\sw(\cdot,\cdot)$, the NN rule is:
 \begin{equation}
 (y_i)^{pred} = \hat{y}_{{\arg\max}_j \sw(\mathbf{x_i}, \mathbf{\hat{x}_j})}
 \end{equation}
 
-We use label propagation in order to enforce consistency of the predicted labels of unsupervised data points. Our label propagation construction is similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}. In order to enforce this consistency, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points such that neighbor set $\mathcal{N}(\xui)$ for $\xui$ is the k-unsupervised data point having highest similarity to $\xui$ using the cosine similarity in the feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points with label propagation;
+We use label propagation to enforce consistency of the predicted labels of unsupervised data points. Our label propagation is similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}. In order to enforce this consistency, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points such that neighbor set $\mathcal{N}(\xui)$ for $\xui$ is the k-unsupervised data point having highest similarity to $\xui$ using the cosine similarity in the feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points with label propagation;
 \begin{equation}
 \begin{aligned}
 \min_{y_1, \ldots y_{N^u}}  &\sum_{i \in N^u} - \max_{\hat{y}_j=y_i}  \sw(\mathbf{\hat{x}}_j,\mathbf{x}_{i}) \\
@@ -67,24 +68,25 @@ We use label propagation in order to enforce consistency of the predicted labels
 \end{aligned}
 \label{robtran}
 \end{equation}
-
 This problem can approximately be solved using many existing methods like $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO) and linear programming through roof-duality etc. We use $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. 
 
 In order to further explain the label propagation, we visualize a sample example with $k=2$ and $3$-class classification problem in Figure~\ref{vis_label_prop}. 
 
-It is also critical that this formulation requires solving high number of nearest neighbors and it is computationally challenging. However, our choice of optimization method and parameters makes this computation tractable. We use stochastic gradient descent in our adaptation stage with a carefully chosen batch size and it requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
+It is also critical that this formulation requires solving high number of nearest neighbors and it is computationally challenging. However, our choice of optimization method makes this computation tractable. We use stochastic gradient descent in our adaptation stage with a carefully chosen batch size and it requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
 
 \subsection{Adaptation: Learning the Metric}
 \label{metric}
 Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to learn an asymmetric metric in order to minimize the loss function defined in (\ref{loss}). 
 
-The main intuition behind our formulation is to seek for a metric which can label the supervised data points correctly using the unsupervised data points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised data point; hence, we can estimate a label for supervised point using the predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric. In other words, the goal of the adaptation stage is:
+The main intuition behind our formulation is to seek for a metric which can label the supervised points correctly using the unsupervised points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised point; hence, we can estimate a label for supervised point using the predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric. In other words, the goal of the adaptation stage is:
+
+\vspace{-3mm}
 \begin{itemize}
 \item predicting $\hat{y}^{pred}_j$ using $\xui, \xsj, \yui$
 \item learning $\sw(\cdot,\cdot)$ by penalizing  $(\hat{y}_j)^{pred} \neq \hat{y}_j$ 
 \end{itemize}
 
-Fortunately, this can be jointly solved by minimizing the triplet loss defined with supervised data points and their closest same class and different class neighbors among the unsupervised points. Formally, we find the closest same class and different class unsupervised data points as;
+Fortunately, this can be jointly solved by minimizing the triplet loss defined with supervised data points and their closest same class and different class neighbors among the unsupervised points. Formally, we find the closest same class and different class points as;
 \begin{equation}
 \begin{aligned}
 &i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \sw(\xsi, \xui) \\
@@ -109,10 +111,11 @@ which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and w
 \end{equation}
 %\end{small}
 %\end{small}
-As a regularizer use the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine and how we implement in the Section~\ref{imp_det}.
+As a regularizer use the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine in the Section~\ref{imp_det}.
 \subsection{Learning Features}
 In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggests that learning this feature function $\Phi$ from the data using neural networks is a promising direction especially for visual domains. Hence, we consider the case, where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
 
+\vspace{-3mm}
 \begin{small}
 \begin{equation}
 \begin{aligned}
@@ -123,6 +126,7 @@ In Section~\ref{label}~and~\ref{metric}, we explained our transduction with labe
 \end{equation}
 \end{small}
 where {\small $\frac{\partial \sw(\xsi,\xuj) }{\partial \mathbf{\theta}} =\Phi(\xuj)^\intercal \mathbf{W}^\intercal \frac{\partial \phi_\mathbf{\theta}(\xsi)}{\partial \theta} + \Phi(\xsi)^\intercal \mathbf{W} \frac{\partial \phi_\mathbf{\theta}(\xuj)}{\partial \theta} $}
+\vspace{-3mm}
 
 \begin{algorithm}[tb]
    \caption{Transduction with Domain Shift}
