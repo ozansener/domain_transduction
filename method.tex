@@ -45,8 +45,10 @@ We solve this optimization problem via alternating minimization through iteratin
 \subsection{Transduction: Labeling Target Domain}
 \label{label}
 \begin{figure}[ht]
-\includegraphics[width=\columnwidth]{figure3}
-\caption{\textbf{Visualization of the Label Propogation.} Consider the unsupervised point $x_1$, the  resulting label would be: $\min_{y_1}$ \mbox{$-\sw(\hat{\mathbf{x}}_1,\mathbf{x}_1)\mathds{1}(y_1=1)$} $-\sw(\hat{\mathbf{x}}_{9},\mathbf{x}_1)\mathds{1}(y_1=2) -\sw(\hat{\mathbf{x}}_{6},\mathbf{x}_3)\mathds{1}(y_3=0) + \Phi(\mathbf{x}_1)^\intercal\phi(\mathbf{x}_2)\mathds{1}(y_1 \neq y_2) +\Phi(\mathbf{x}_3)^\intercal\phi(\mathbf{x}_1)\mathds{1}(y_1 \neq y_3)$}
+\includegraphics[width=\columnwidth]{fig11}
+\caption{\textbf{Visualization of the Label Propogation.} We create a k-NN graph of unsupervised target domain to enforce consistency with pairwise terms 
+\mbox{$\psi_{ij}=sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)$} and use closest supervised source points to each class as 
+\mbox{$ \psi_{i\hat{k}} \sw(\mathbf{\hat{x}}_k,\mathbf{x}_{i})$}.} 
 \label{vis_label_prop}
 \end{figure}
 In order to label the unsupervised points, we use the nearest-neighbor (NN) rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the corresponding label. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
