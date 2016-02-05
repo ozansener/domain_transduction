@@ -8,13 +8,13 @@ In the unsupervised domain adaptation problem, one of the domains (source) is fu
 
 We further assume that both domains have different distributions $\xsi \sim p_s$ and $\xui \sim p_t$ defined on the same space as $\xsi,\xui \in \mathcal{X}$ and there exists a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable to both. We further study the case where the feature function is parametric with a parameter $\mathbf{\theta}$ defined as \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$}, and we develop a method to learn the parameters.
 
-Our model has two main components; transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. 
+Our model has two main components, transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. 
 
 For adaptation, we explicitly model the domain shift in the form of an asymmetric similarity as
 \begin{equation}
 \sw(\xsi,\xuj) = \Phi(\xsi)^\intercal \mathbf{W} \Phi(\xuj)
 \end{equation}
-such that it is high if two data points, $\xsj$ from the source and $\xui$ from the target, are from the same class.
+such that it is high if two data points, $\xsi$ from the source and $\xuj$ from the target, are from the same class.
 
 We further model our transduction in the form of a nearest neighbor and we follow the triplet loss defined in \cite{lmnn} in order to solve adaptation by taking the nearest neighbor inference into learning. While the original triplet loss \cite{lmnn} enforces a margin $\alpha$ between the similarity of any point to its nearest neighbor from the same class and the nearest neighbor from other classes, we extend this construction to the unsupervised domain adaptation by enforcing a similar margin. For each source point, we enforce a margin between its similarity to the nearest neighbor from the target having the same label and having a different label as; $ \sw(\xsi,\mathbf{x}_{i^+}) > \sw(\xsi,\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class to the $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label.
 
@@ -31,7 +31,7 @@ Our model leads to the following optimization problem, over the target labels $\
 \end{aligned}
 \label{loss}
 \end{equation}
-where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise and $[a]_+$ is a rectifier function which is equal to $\max(0, a)$ and $sim$ is any similarity function in which we use cosine similarity as $sim(\xui, \xuj)= \frac{\Phi(\xui)^\intercal \Phi(\xuj)}{|\Phi(\xui)||\Phi(\xuj)|}$. 
+where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise and $[a]_+$ is a rectifier function which is equal to $\max(0, a)$ and $sim$ is any similarity function, we use cosine similarity as $sim(\xui, \xuj)= \frac{\Phi(\xui)^\intercal \Phi(\xuj)}{|\Phi(\xui)||\Phi(\xuj)|}$. 
 
 We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\mathbf{W}$ (adaptation). We explain these two steps in detail in the following sections.
 
@@ -59,7 +59,7 @@ Given a similarity metric $\sw(\cdot,\cdot)$, the NN rule is:
 (y_i)^{pred} = \hat{y}_{{\arg\max}_j \sw(\mathbf{x_i}, \mathbf{\hat{x}_j})}
 \end{equation}
 
-We use label propagation to enforce consistency of the predicted labels of unsupervised data points. Our label propagation is similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}. In order to enforce this consistency, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points such that neighbor set $\mathcal{N}(\xui)$ for $\xui$ is the k-unsupervised data point having highest similarity to $\xui$ using the cosine similarity in the feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points with label propagation;
+We use label propagation to enforce consistency of the predicted labels of unsupervised data points. Our label propagation is similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}. In order to enforce this consistency, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points such that neighbors $\mathcal{N}(\xui)$ for $\xui$ is the k-unsupervised data point having highest similarity to $\xui$ using the cosine similarity in the feature space. After the k-NN graph is created, we solve the following optimization problem for labeling unsupervised data points with label propagation;
 \begin{equation}
 \begin{aligned}
 \min_{y_1, \ldots y_{N^u}}  &\sum_{i \in N^u} - \max_{\hat{y}_j=y_i}  \sw(\mathbf{\hat{x}}_j,\mathbf{x}_{i}) \\
@@ -78,7 +78,7 @@ It is also critical that this formulation requires solving high number of neares
 \label{metric}
 Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to learn an asymmetric metric in order to minimize the loss function defined in (\ref{loss}). 
 
-The main intuition behind our formulation is to seek for a metric which can label the supervised points correctly using the unsupervised points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised point; hence, we can estimate a label for supervised point using the predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric. In other words, the goal of the adaptation stage is:
+The main intuition behind our formulation is to seek a metric which can label the supervised points correctly using the unsupervised points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised point; hence, we can estimate a label for an supervised point using the predicted labels. We also have ground truth labels for the supervised data points and we combine them to find an asymmetric metric. In other words, the goal of the adaptation stage is:
 
 \vspace{-3mm}
 \begin{itemize}
@@ -95,9 +95,10 @@ Fortunately, this can be jointly solved by minimizing the triplet loss defined w
 \end{aligned}
 \end{equation}
 
-We further define the loss function with regularizer using the nearest neighbors as
+We further define the loss function with a regularizer using the nearest neighbors as: $loss(\mathbf{W})=$
 \begin{equation}
-\min_{\mathbf{W}} \sum_{i \in [N^s]} [\sw(\mathbf{\hat{x}}_i,\mathbf{x}_{i^-}) - \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{i^+}) + \alpha]_{+} + r(\mathbf{W})
+%\min_{\mathbf{W}}
+ \sum_{i \in [N^s]} [\sw(\mathbf{\hat{x}}_i,\mathbf{x}_{i^-}) - \sw(\mathbf{\hat{x}}_i,\mathbf{x}_{i^+}) + \alpha]_{+} + r(\mathbf{W})
 \end{equation}
 which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and we optimize it via stochastic gradient descent using the subgradient \
 \mbox{$\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}} = \frac{\partial r ( \mathbf{W})}{\partial \mathbf{W}} + $}
