@@ -114,7 +114,6 @@ As a regularizer use the Frobenius norm of the similarity matrix as $r(\mathbf{W
 \subsection{Learning Features}
 In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggest that learning this feature function $\Phi$ from the data using deep neural networks is a promising direction especially for visual domains. Hence, we consider the case where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
 
-\vspace{-3mm}
 \begin{small}
 \begin{equation}
 \begin{aligned}
@@ -125,7 +124,6 @@ In Section~\ref{label}~and~\ref{metric}, we explained our transduction with labe
 \end{equation}
 \end{small}
 where {\small $\frac{\partial \sw(\xsi,\xuj) }{\partial \mathbf{\theta}} =\Phi(\xuj)^\intercal \mathbf{W}^\intercal \frac{\partial \phi_\mathbf{\theta}(\xsi)}{\partial \theta} + \Phi(\xsi)^\intercal \mathbf{W} \frac{\partial \phi_\mathbf{\theta}(\xuj)}{\partial \theta} $}
-\vspace{-3mm}
 
 \begin{algorithm}[tb]
    \caption{Transduction with Domain Shift}
