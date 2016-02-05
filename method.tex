@@ -1,5 +1,5 @@
 % !TEX root = domain_transduction.tex
-We address the problem of unsupervised domain adaptation using transduction by jointly solving for the labels of unsupervised target domain as well as the shift between the domains. We first define our model in Section~\ref{prob:def} and explain the two sub-problems of transduction and adaptation. We further explain the details of transduction in Section~\ref{label} and the details of adaptation in Section~\ref{metric}.
+We address the problem of unsupervised transductive domain adaptation by jointly solving for the label assignment of unsupervised target domain as well as the shift between the domains. We first define our model in Section~\ref{prob:def} and explain the two sub-problems of transduction and adaptation. We further explain the details of transduction in Section~\ref{label} and the details of adaptation in Section~\ref{metric}.
 %Unsupervised domain adaptation is inherently a transduction problem since the main challenge lies in labeling the unsupervised data points with the help of the supervised data; because, adaptation is done offline without computationally concerns and the accuracy is critical since the transduction error is a good proxy for generalization \cite{adapttheory}. Main complication, which makes existing transduction methods inapplicable, is the domain shift between the supervised and unsupervised data points . We explicitly model the domain shift and jointly solve for unsupervised labels as well as the domain shift in a transductive learning setup.
 
 \subsection{Problem Definition}
@@ -68,9 +68,7 @@ We use label propagation to enforce consistency of the predicted labels of unsup
 \end{aligned}
 \label{robtran}
 \end{equation}
-This problem can approximately be solved using many existing methods such as $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO) and linear programming through roof-duality. We use the $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. 
-
-In order to further explain the label propagation, we visualize an example with $k=4$ and $4$-class classification problem in Figure~\ref{vis_label_prop}. 
+This problem can approximately be solved using many existing methods such as $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO) and linear programming through roof-duality. We use the $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. In order to further explain the label propagation, we visualize an example with $k=4$ and $4$-class classification problem in Figure~\ref{vis_label_prop}. 
 
 It is also critical that this formulation requires solving high number of nearest neighbors which is computationally challenging. However, our choice of optimization method makes this computation tractable. We use stochastic gradient descent in our adaptation stage with a carefully chosen batch size, which requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
 
@@ -114,7 +112,7 @@ which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and w
 %\end{small}
 As a regularizer use the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine in the Section~\ref{imp_det}.
 \subsection{Learning Features}
-In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggest that learning this feature function $\Phi$ from the data using neural networks is a promising direction especially for visual domains. Hence, we consider the case where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
+In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggest that learning this feature function $\Phi$ from the data using deep neural networks is a promising direction especially for visual domains. Hence, we consider the case where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
 
 \vspace{-3mm}
 \begin{small}
