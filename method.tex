@@ -6,7 +6,7 @@ We address the problem of unsupervised domain adaptation using transduction by j
 \label{prob:def}
 In the unsupervised domain adaptation problem, one of the domains (source) is fully supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \{1,\ldots, k \}$. Whereas, the other domain (target) is unsupervised and only has $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
 
-We further assume that both domains lie in the same space as $\xsi,\xui \in \mathcal{X}$ and there exists a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable to both. We further study the case where the feature function is parametric with a parameter $\mathbf{\theta}$ defined as \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$}, and we develop a method to learn the parameters.
+We further assume that both domains have different distributions $\xsi \sim p_s$ and $\xui \sim p_t$ defined on the same space as $\xsi,\xui \in \mathcal{X}$ and there exists a feature function \mbox{$\Phi:\mathcal{X}\rightarrow \mathcal{R}^d$} which is applicable to both. We further study the case where the feature function is parametric with a parameter $\mathbf{\theta}$ defined as \mbox{$\Phi_\mathbf{\theta}:\mathcal{X}\rightarrow \mathcal{R}^d$}, and we develop a method to learn the parameters.
 
 Our model has two main components; transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. 
 
