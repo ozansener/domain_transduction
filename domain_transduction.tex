@@ -96,7 +96,7 @@
 ]
 
 \begin{abstract} 
-Supervised learning has enabled many interesting application thanks to available large scale labelled datasets and very expressive models. In the absence of such a large dataset, domain adaptation is a promising direction to use a large labelled dataset as a reference and learn a model on unlabeled target dataset of interest. In this paper we approach to the problem of unsupervised domain adaptation from a transduction perspective by considering the inference algorithm and target labels as part of the problem. We explicitly model the domain shift in terms of an asymmetric similarity metric and jointly solve for domain shift as well as the target domain labels. We also show that our model can easily be extended for feature learning in order to learn features which are discriminative in the target domain. Our transductive model significantly outperform state-of-the-art algorithms in both object recognition and digit classification experiments.
+Recently, supervised learning with large scale labeled datasets and deep layered models has made a paradigm shift in diverse areas in learning and recognition. However, this approach still suffers generalization issues under the presence of a domain shift between the training and the test data distribution. In this regard, unsupervised domain adaptation algorithms have been proposed to directly address the domain shift problem. In this paper, we approach the problem from a transductive perspective. We incorporate the domain shift and the transductive target inference into our framework by jointly solving for an asymmetric similarity metric and the optimal transductive target label assignment. We also show that our model can easily be extended for deep feature learning in order to learn features which are discriminative in the target domain. Our experiments show that the proposed method significantly outperforms state-of-the-art algorithms in both object recognition and digit classification experiments by a large margin.
 \end{abstract} 
 
 \section{Introduction}
@@ -107,9 +107,7 @@ Formally, the goal of unsupervised domain adaptation is: given a fully labeled s
 
 Concretely, we formulate a unified framework where the domain transformation parameter and the target labels are jointly optimized in two alternating stages. In the transduction stage, given a fixed domain transform parameter, we jointly infer all target labels by solving a discrete multi-label energy minimization problem. In the adaptation stage, given a fixed target label assignment, we seek to find the optimal asymmetric metric  between the source and the target data. The advantage of the method is that the we can learn a domain transformation parameter which is aware of the subsequent transductive inference procedure. 
 
-Following the standard evaluation protocol in the domain adaptation community, we evaluate our method on the digit classification task using MNIST \cite{mnist} and SVHN\cite{svhn} as well as the object recognition task using the Office \cite{office} dataset, and demonstrate state of the art performance in comparison to all existing unsupervised domain adaptation methods. 
-
-We further share our learned models as well as the source code using TensorFlow\cite{tensorflow}. on \url{http://anonymized.webpage}
+Following the standard evaluation protocol in the domain adaptation community, we evaluate our method on the digit classification task using MNIST \cite{mnist} and SVHN\cite{svhn} as well as the object recognition task using the Office \cite{office} dataset, and demonstrate state of the art performance in comparison to all existing unsupervised domain adaptation methods.  We will make our learned models as well as the source code available immediately upon acceptance.
 
 \section{Related Work} 
 
@@ -131,7 +129,7 @@ To summarize, our main contribution is to formulate joint optimization framework
 \section{Experimental Results}
 \input{exp.tex}
 \section{Conclusion} 
-We described a transductive approach to the unsupervised domain adaptation problem by defining a joint learning problem on the unsupervised target labels and a asymmetric similarity metric across the domains. We further described a method to learn features which are discriminative in the target domain. Experimental results on digit classification using MNIST\cite{mnist} and SVHN\cite{svhn} as well as on object recognition using Office\cite{office} dataset show state of the art performance with a significant margin.
+We described a transductive approach to the unsupervised domain adaptation problem by defining a joint learning problem on the transductive target label assignment and a asymmetric similarity metric across the domains. We further described a method to learn deep features which are discriminative in the target domain. Experimental results on digit classification using MNIST\cite{mnist} and SVHN\cite{svhn} as well as on object recognition using Office\cite{office} dataset show state of the art performance with a significant margin. We will make our learned models as well as the source code available immediately upon acceptance.
 
 
 
