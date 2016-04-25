@@ -1,7 +1,7 @@
 % !TEX root = domain_transduction.tex
 We evaluate our algorithm on various unsupervised domain adaptation tasks while focusing on two different problems, hand-written digit classification and object recognition. For each experiment, we use three domains and evaluate all adaptation scenarios.
 
-\begin{table*}[ht]
+\begin{table}[ht]
 \vspace{-3mm}
 \caption{Accuracy of our method and the state-of-the-art algorithms on Office dataset and various adaptation settings}
 \label{tab:res}
@@ -27,13 +27,12 @@ Our Method & $\mathbf{.804}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ 
 \end{center}
 \end{sc}
 
-\end{table*}
+\end{table}
 \begin{table}[ht]
 \caption{Accuracy on the digit classification task.}
 \label{tab:res2}
 \begin{sc}
 \begin{small}
-\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}r@{\hskip 1mm}c@{\hskip 1mm}c@{\hskip 1mm}c@{\hskip 1mm}c@{}} \toprule 
 Source & M-M & MNIST  & SVHN & MNIST \\
 Target&  MNIST & M-M & MNIST & SVHN\\
@@ -44,7 +43,7 @@ BP \cite{ganin15} &$.732$ & $.766$ & $.738$ & $.289$ \\
 Source Only  & $.483$ & $.522$  &.549 & $.162$  \\
 Our Method & $\mathbf{.835}$ & $\mathbf{.855}$ & $\mathbf{.774}$ & $\mathbf{.323}$\\
  \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{small}
 \end{sc}
 \end{table}
@@ -129,26 +128,15 @@ In Figure~\ref{fig:tsnedigit}, we show the digit images of source and target aft
 In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method without the label propagation (noted as \emph{No Label Propogation}) and without feature learning (noted as \emph{No Feature Learning}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity.  Results are shown in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. This is also expected since without label propagation, the labeling stage will have more mis-classifications and they will decrease the accuracy of the metric.
 %>>>>>>> 495209cbd03d496cea6aa34df03ce5686deb5946
 
-\begin{figure*}[ht]
-    \begin{subfigure}[b]{0.25\textwidth}
-        \includegraphics[width=\textwidth]{before_c_s_c}
-        \caption{S. w/o Adaptation}
-        \label{fig:gull}
-    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
-        \includegraphics[width=\textwidth]{after_c_s_c}
-        \caption{S. with Adaptation}
-    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
-        \includegraphics[width=\textwidth]{before_c_t_c}
-        \caption{T w/o Adaptation}
-        \label{fig:gull}
-    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
-        \includegraphics[width=\textwidth]{after_c_t_c}
-        \caption{T with Adaptation}
-    \end{subfigure}
+\begin{figure}[ht]
+    \subfigure[S. w/o Adaptation]{\includegraphics[width=0.25\textwidth]{before_c_s_c}}~
+    \subfigure[S. with Adaptation]{\includegraphics[width=0.25\textwidth]{after_c_s_c}}~
+    \subfigure[T w/o Adaptation]{\includegraphics[width=0.25\textwidth]{before_c_t_c}}~
+    \subfigure[T with Adaptation]{\includegraphics[width=0.25\textwidth]{after_c_t_c}}
     \caption{tSNE plots for office dataset Webcam(S)$\rightarrow$Amazon(T). Source features were discriminative and stayed discriminative as expected. On the other hand, target features became quite discriminative after the adaptation.}
     \label{fig:tsne}
         \includegraphics[width=\textwidth]{out_im.png}
         \vspace{-5mm}
 \caption{tSNE plot for SVHN$\rightarrow$MNIST experiment. Please note that the discriminative behavior only emerges in the unsupervised target instead of the source domain. This explains the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in.  }
 \label{fig:tsnedigit}
-\end{figure*}
+\end{figure}
