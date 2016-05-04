@@ -46,7 +46,6 @@ We solve this optimization problem via alternating minimization through iteratin
 \label{label}
 \begin{figure}[ht]
 \includegraphics[width=\columnwidth]{fig11}
-\vspace{-6mm}
 \caption{\textbf{Visualization of the Label Propogation.} We create a k-NN graph of unsupervised target points to enforce consistency with pairwise terms 
 \mbox{$\psi_{ij}=sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)$} and use closest supervised source points to each class as 
 \mbox{$ \psi_{i\hat{k}} \sw(\mathbf{\hat{x}}_k,\mathbf{x}_{i})$}.} 
@@ -78,7 +77,6 @@ Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to
 
 The main intuition behind our formulation is to seek a metric which can label the supervised points correctly using the unsupervised points and their predicted labels. In other words, we reverse the labeling direction. At this stage we have already predicted a label for each unsupervised point; hence, we can estimate a label for each supervised point using the predicted labels. We also have ground truth labels for the supervised points and we combine them to find an asymmetric metric. In other words, the goal of the adaptation stage is:
 
-\vspace{-3mm}
 \begin{itemize}
 \item predicting $\hat{y}^{pred}_j$ using $\xui, \xsj, \yui$
 \item learning $\sw(\cdot,\cdot)$ by penalizing  $(\hat{y}_j)^{pred} \neq \hat{y}_j$ 

@@ -2,7 +2,6 @@
 We evaluate our algorithm on various unsupervised domain adaptation tasks while focusing on two different problems, hand-written digit classification and object recognition. For each experiment, we use three domains and evaluate all adaptation scenarios.
 
 \begin{table}[ht]
-\vspace{-3mm}
 \caption{Accuracy of our method and the state-of-the-art algorithms on Office dataset and various adaptation settings}
 \label{tab:res}
 \begin{sc}
@@ -89,9 +88,7 @@ Table~\ref{tab:res2} further suggests our algorithm is the only one which can ge
 Another interesting conclusion is the asymmetric nature of the results. For example, the accuracy of adapting webcam to amazon and adapting Amazon to webcam is significantly different in Table~\ref{tab:res}. The similar behavior exists in MNIST and SVHN domains as well in Table~\ref{tab:res}. This observation validates the importance of an asymmetric modeling.
 
 \begin{figure}[ht]
-\vspace{-1mm}
 \includegraphics[width=\columnwidth]{no_feature_propogation}
-\vspace{-6mm}
 \caption{Accuracy vs number of iterations for our method and its variant without label propagation as well as the variant without feature learning. As the figure suggests the label propagation increases both the stability of the gradients as well as the final accuracy. Moreover, the feature learning also has a significant effect on the accuracy.}
 \label{fllprop}
 \end{figure}
@@ -106,7 +103,6 @@ In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam an
 \begin{figure}[ht]
 \begin{small}
 \includegraphics[width=\columnwidth]{nndig}
-\vspace{-5mm}
 \caption{Example nearest neighbors for SVHN$\rightarrow$MNIST experiment. We show an example MNIST image and 5-NN SVHN images. Please note the large domain difference.}
 \label{fig:nn}
 %\end{figure}
@@ -136,7 +132,6 @@ In order to evaluate the effect of having a robust label propagation and feature
     \caption{tSNE plots for office dataset Webcam(S)$\rightarrow$Amazon(T). Source features were discriminative and stayed discriminative as expected. On the other hand, target features became quite discriminative after the adaptation.}
     \label{fig:tsne}
         \includegraphics[width=\textwidth]{out_im.png}
-        \vspace{-5mm}
 \caption{tSNE plot for SVHN$\rightarrow$MNIST experiment. Please note that the discriminative behavior only emerges in the unsupervised target instead of the source domain. This explains the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in.  }
 \label{fig:tsnedigit}
 \end{figure}
