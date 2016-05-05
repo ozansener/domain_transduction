@@ -45,7 +45,8 @@ We solve this optimization problem via alternating minimization through iteratin
 \subsection{Transduction: Labeling Target Domain}
 \label{label}
 \begin{figure}[ht]
-\includegraphics[width=\columnwidth]{fig11}
+\centering
+\includegraphics[width=0.75\columnwidth]{fig11}
 \caption{\textbf{Visualization of the Label Propogation.} We create a k-NN graph of unsupervised target points to enforce consistency with pairwise terms 
 \mbox{$\psi_{ij}=sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)$} and use closest supervised source points to each class as 
 \mbox{$ \psi_{i\hat{k}} \sw(\mathbf{\hat{x}}_k,\mathbf{x}_{i})$}.} 

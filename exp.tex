@@ -2,6 +2,7 @@
 We evaluate our algorithm on various unsupervised domain adaptation tasks while focusing on two different problems, hand-written digit classification and object recognition. For each experiment, we use three domains and evaluate all adaptation scenarios.
 
 \begin{table}[ht]
+\centering
 \caption{Accuracy of our method and the state-of-the-art algorithms on Office dataset and various adaptation settings}
 \label{tab:res}
 \begin{sc}
@@ -28,6 +29,7 @@ Our Method & $\mathbf{.804}$ &.962 & $.989$ & $\mathbf{.625}$ & $\mathbf{.839}$ 
 
 \end{table}
 \begin{table}[ht]
+\centering
 \caption{Accuracy on the digit classification task.}
 \label{tab:res2}
 \begin{sc}
@@ -105,15 +107,18 @@ In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam an
 \includegraphics[width=\columnwidth]{nndig}
 \caption{Example nearest neighbors for SVHN$\rightarrow$MNIST experiment. We show an example MNIST image and 5-NN SVHN images. Please note the large domain difference.}
 \label{fig:nn}
-%\end{figure}
-%\begin{figure}[ht]
-\includegraphics[width=\columnwidth]{nnfi-01.png}
-\caption{Example nearest neighbors for Amazon$\leftrightarrow$Webcam experiment. We show an example source image and 3-NN target images. The drop in the accuracy after the nearest neighbors is expected since our loss function only models the nearest one.}
-\label{fig:nnoffice}
 \end{small}
 \end{figure}
 
 The difference between invariance and equivariance is more clear in the tSNE plots of the Office dataset in Figure~\ref{fig:tsne} as well as digit classification task Figure~\ref{fig:tsnedigit}. In Figure~\ref{fig:tsne}, we plot the distribution of features before and after adaptation for source and target while color coding class labels. As Figure~\ref{fig:tsne} suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain features have no structure before adaptation. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also get clustered according to the object classes. 
+
+\begin{figure}[ht]
+\begin{small}
+\includegraphics[width=\columnwidth]{nnfi-02.png}
+\caption{Example nearest neighbors for Amazon$\leftrightarrow$Webcam experiment. We show an example source image and 3-NN target images. The drop in the accuracy after the nearest neighbors is expected since our loss function only models the nearest one.}
+\label{fig:nnoffice}
+\end{small}
+\end{figure}
 
 In Figure~\ref{fig:tsnedigit}, we show the digit images of source and target after the adaptation. Clearly, the target is well clustered according to the classes and source is not very well clustered although it has some structure. Since we learn the entire network for digit classification, our networks learn discriminative features in target domain as our loss depends directly on classification scores in target domain. Moreover, discriminative features in target arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, our similarity metric explicitly models the relationship between the domains and results in an equivariant model while enforcing discriminative behavior in the target. We also draw lines between the nearest neighbor images of source and target images to show the accuracy of the metric function. Moreover, the nearest neighbors are quite accurate confirming the quantitative results. 
 
@@ -124,13 +129,18 @@ In Figure~\ref{fig:tsnedigit}, we show the digit images of source and target aft
 In order to evaluate the effect of having a robust label propagation and feature learning, we compare our method without the label propagation (noted as \emph{No Label Propogation}) and without feature learning (noted as \emph{No Feature Learning}). We plot the accuracy vs number of iterations in order to evaluate both the effect on learning rate as well as the accuracy. Although we plot the results only for MNIST$\rightarrow$MNIST-M, the other experiments have similar results and not displayed for the sake of clarity.  Results are shown in the Figure~\ref{fllprop}, and it suggests that both feature learning and label propagation is crucial for successful transduction. Another interesting observation is the unstable behavior when we disable label propagation. This is also expected since without label propagation, the labeling stage will have more mis-classifications and they will decrease the accuracy of the metric.
 %>>>>>>> 495209cbd03d496cea6aa34df03ce5686deb5946
 
+
 \begin{figure}[ht]
-    \subfigure[S. w/o Adaptation]{\includegraphics[width=0.25\textwidth]{before_c_s_c}}~
-    \subfigure[S. with Adaptation]{\includegraphics[width=0.25\textwidth]{after_c_s_c}}~
-    \subfigure[T w/o Adaptation]{\includegraphics[width=0.25\textwidth]{before_c_t_c}}~
-    \subfigure[T with Adaptation]{\includegraphics[width=0.25\textwidth]{after_c_t_c}}
+    \subfigure[S. w/o Adaptation]{\includegraphics[width=0.5\textwidth]{before_c_s_c}}~
+    \subfigure[S. with Adaptation]{\includegraphics[width=0.5\textwidth]{after_c_s_c}}\\
+    \subfigure[T w/o Adaptation]{\includegraphics[width=0.5\textwidth]{before_c_t_c}}~
+    \subfigure[T with Adaptation]{\includegraphics[width=0.5\textwidth]{after_c_t_c}}
     \caption{tSNE plots for office dataset Webcam(S)$\rightarrow$Amazon(T). Source features were discriminative and stayed discriminative as expected. On the other hand, target features became quite discriminative after the adaptation.}
     \label{fig:tsne}
+ \end{figure}
+
+
+\begin{figure}[ht]
         \includegraphics[width=\textwidth]{out_im.png}
 \caption{tSNE plot for SVHN$\rightarrow$MNIST experiment. Please note that the discriminative behavior only emerges in the unsupervised target instead of the source domain. This explains the motivation behind modeling the problem as transduction. In other words, our algorithm is designed to be accurate and discriminative in the target domain which is the domain we are interested in.  }
 \label{fig:tsnedigit}
