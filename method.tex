@@ -16,9 +16,36 @@ For adaptation, we explicitly model the domain shift in the form of an asymmetri
 \end{equation}
 such that it is high if two data points, $\xsi$ from the source and $\xuj$ from the target, are from the same class.
 
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \begin{minipage}{0.5\textwidth}
+    \vspace{-1cm}
+\begin{algorithm}[H]
+   \caption{Transduction with Domain Shift}
+   \label{alg:example}
+\begin{algorithmic}
+   \STATE {\bfseries Input:} source $\mathbf{x}_i$, target $\mathbf{\hat{x}}_i$, $y_i$, batch size $B$
+   \REPEAT
+   \STATE  Sample $\{\mathbf{x^b}_{1 \cdots B}\}$, $\{\mathbf{\hat{x}}^b_{1 \cdots B}, \hat{y}^b_{1\cdots B}\}$
+   \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
+   \FOR{$i=1$ {\bfseries to} $B$}
+      \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots y_B} $} 
+   \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
+   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta}}$ and  $\frac{\partial loss}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
+   \ENDIF
+   \ENDFOR
+   \STATE $\mathbf{W} \leftarrow \mathbf{W} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}}$ 
+   \STATE $\mathbf{\theta} \leftarrow \mathbf{\theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}}$
+   \UNTIL CONVERGENCE or $MAX\_ITER$
+\end{algorithmic}
+\end{algorithm}
+\vspace{-1cm}
+  \end{minipage}
+  \end{wrapfigure}
+
 We further model our transduction in the form of a nearest neighbor and we follow the triplet loss defined in \cite{lmnn} in order to solve adaptation by taking the nearest neighbor inference into learning. While the original triplet loss \cite{lmnn} enforces a margin $\alpha$ between the similarity of any point to its nearest neighbor from the same class and the nearest neighbor from other classes, we extend this construction to the unsupervised domain adaptation by enforcing a similar margin. For each source point, we enforce a margin between its similarity with the nearest neighbor from the target having the same label and having a different label as; $ \sw(\xsi,\mathbf{x}_{i^+}) > \sw(\xsi,\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class as $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label.
 
 Since we model our problem as transduction, we include target labels as part of the joint learning and introduce a target label consistency term as well. We enforce that similar unsupervised data points should have the same label after the transduction by penalizing label disagreements between similar images.
+
 
 Our model leads to the following optimization problem, over the target labels $\yui$ and the similarity metric $\mathbf{W}$, jointly solving transduction and adaptation. 
 \begin{equation}
@@ -35,7 +62,6 @@ where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $
 
 We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\mathbf{W}$ (adaptation). We explain these two steps in detail in the following sections.
 
- 
  %} $ 
 
 %$\max_{y_1} \$
@@ -44,14 +70,6 @@ We solve this optimization problem via alternating minimization through iteratin
 
 \subsection{Transduction: Labeling Target Domain}
 \label{label}
-\begin{figure}[ht]
-\includegraphics[width=\columnwidth]{fig11}
-\vspace{-6mm}
-\caption{\textbf{Visualization of the Label Propogation.} We create a k-NN graph of unsupervised target points to enforce consistency with pairwise terms 
-\mbox{$\psi_{ij}=sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)$} and use closest supervised source points to each class as 
-\mbox{$ \psi_{i\hat{k}} \sw(\mathbf{\hat{x}}_k,\mathbf{x}_{i})$}.} 
-\label{vis_label_prop}
-\end{figure}
 In order to label the unsupervised points, we use the nearest-neighbor rule. We simply compute the NN supervised data point for each unsupervised data point using the learned metric $\sw(\cdot,\cdot)$ and transfer the corresponding label. In the initial stages of our optimization, our tranduction needs to be accurate even with a sub-optimal similarity metric due to the iterative fashion of our algorithm. Hence, we enforce a consistent labeling via label propagation. We first formally define the NN-rule and then introduce the label propagation.
 
 Given a similarity metric $\sw(\cdot,\cdot)$, the NN rule is:
@@ -69,6 +87,16 @@ We use label propagation to enforce consistency of the predicted labels of unsup
 \label{robtran}
 \end{equation}
 This problem can approximately be solved using many existing methods such as $\alpha$-$\beta$ swapping, quadratic pseudo-boolean optimization (QPBO) and linear programming through roof-duality. We use the $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. In order to further explain the label propagation, we visualize an example with $k=4$ and $4$-class classification problem in Figure~\ref{vis_label_prop}. 
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+\includegraphics[width=0.5\textwidth]{fig11}
+\caption{\textbf{Visualization of the Label Propogation.} We create a k-NN graph of unsupervised target points to enforce consistency with pairwise terms 
+\mbox{$\psi_{ij}=sim(\mathbf{x}_i, \mathbf{x}_j) \mathds{1}(y_i \neq y_j)$} and use closest supervised source points to each class as 
+\mbox{$ \psi_{i\hat{k}} \sw(\mathbf{\hat{x}}_k,\mathbf{x}_{i})$}.} 
+\vspace{-1cm}
+\label{vis_label_prop}
+\end{wrapfigure}
+
 
 It is also critical that this formulation requires solving high number of nearest neighbors which is computationally challenging. However, our choice of optimization method makes this computation tractable. We use stochastic gradient descent in our adaptation stage with a carefully chosen batch size, which requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
 
@@ -93,6 +121,7 @@ Fortunately, this can be jointly solved by minimizing the triplet loss defined w
 \end{aligned}
 \end{equation}
 
+  
 We further define the loss function with a regularizer using the nearest neighbors as: $loss(\mathbf{W})=$
 \begin{equation}
 %\min_{\mathbf{W}}
@@ -111,6 +140,8 @@ which is convex in terms of the $\mathbf{W}$ if the regularizer is convex; and w
 %\end{small}
 %\end{small}
 As a regularizer use the Frobenius norm of the similarity matrix as $r(\mathbf{W})=\frac{1}{2}\|\mathbf{W}\|_F^2$. We explain the details of this optimization routine in the Section~\ref{imp_det}.
+
+
 \subsection{Learning Features}
 In Section~\ref{label}~and~\ref{metric}, we explained our transduction with label propagation as well as the adaptation algorithm using a pre-defined feature function $\Phi$. However, the current trends in machine learning suggest that learning this feature function $\Phi$ from the data using deep neural networks is a promising direction especially for visual domains. Hence, we consider the case where $\Phi_{\mathbf{\theta}}$ is a parametrized feature function with parameter set, $\mathbf{\theta}$. A typical example is CNNs (Convolutional Neural Networks) with $\mathbf{\theta}$ as concatenation of weights and biases in the layers of CNN. We learn the feature function parameters as part of the adaptation stage with an update; $\frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}} =$
 
@@ -125,22 +156,4 @@ In Section~\ref{label}~and~\ref{metric}, we explained our transduction with labe
 \end{small}
 where {\small $\frac{\partial \sw(\xsi,\xuj) }{\partial \mathbf{\theta}} =\Phi(\xuj)^\intercal \mathbf{W}^\intercal \frac{\partial \phi_\mathbf{\theta}(\xsi)}{\partial \theta} + \Phi(\xsi)^\intercal \mathbf{W} \frac{\partial \phi_\mathbf{\theta}(\xuj)}{\partial \theta} $}
 
-\begin{algorithm}[tb]
-   \caption{Transduction with Domain Shift}
-   \label{alg:example}
-\begin{algorithmic}
-   \STATE {\bfseries Input:} source $\mathbf{x}_i$, target $\mathbf{\hat{x}}_i$, $y_i$, batch size $B$
-   \REPEAT
-   \STATE  Sample $\{\mathbf{x^b}_{1 \cdots B}\}$, $\{\mathbf{\hat{x}}^b_{1 \cdots B}, \hat{y}^b_{1\cdots B}\}$
-   \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
-   \FOR{$i=1$ {\bfseries to} $B$}
-      \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots y_B} $} 
-   \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
-   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta}}$ and  $\frac{\partial loss}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
-   \ENDIF
-   \ENDFOR
-   \STATE $\mathbf{W} \leftarrow \mathbf{W} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}}$ 
-   \STATE $\mathbf{\theta} \leftarrow \mathbf{\theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}}$
-   \UNTIL CONVERGENCE or $MAX\_ITER$
-\end{algorithmic}
-\end{algorithm}
+  

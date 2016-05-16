@@ -1,42 +1,35 @@
 \documentclass{article}
 
-% use Times
-\usepackage{times}
-% For figures
+\usepackage{nips_2016} 
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
 \usepackage{graphicx} % more modern
 %\usepackage{subfigure} 
 \usepackage{subcaption}
-
-
-% For citations
-\usepackage{natbib}
-
 % For algorithms
 \usepackage{algorithm}
 \usepackage{algorithmic}
-
-% As of 2011, we use the hyperref package to produce hyperlinks in the
-% resulting PDF.  If this breaks your system, please commend out the
-% following usepackage line and replace \usepackage{icml2016} with
-% \usepackage[nohyperref]{icml2016} above.
-\usepackage{hyperref}
+\usepackage{wrapfig}
 
 % Packages hyperref and algorithmic misbehave sometimes.  We can fix
 % this with the following command.
-\newcommand{\theHalgorithm}{\arabic{algorithm}}
+%\newcommand{\theHalgorithm}{\arabic{algorithm}}
 
 % Employ the following version of the ``usepackage'' statement for
 % submitting the draft version of the paper for review.  This will set
 % the note in the first column to ``Under review.  Do not distribute.''
-\usepackage{icml2016} 
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{dsfont}
 \usepackage{booktabs}
 \usepackage{relsize}
-\usepackage{lmodern}
-\usepackage{slantsc}
 \usepackage{siunitx}
-\sisetup{output-exponent-marker=\ensuremath{\mathrm{E}}}
 
 
 \newcommand{\xsj}{\mathbf{\hat{x}}_j}
@@ -58,41 +51,43 @@
 
 % The \icmltitle you define below is probably too long as a header.
 % Therefore, a short form for the running title is supplied here:
-\icmltitlerunning{Unsupervised Transductive Domain Adaptation}
+
+\title{Unsupervised Transductive Domain Adaptation}
+
+\author{
+  David S.~Hippocampus\thanks{Use footnote for providing further
+    information about author (webpage, alternative
+    address)---\emph{not} for acknowledging funding agencies.} \\
+  Department of Computer Science\\
+  Cranberry-Lemon University\\
+  Pittsburgh, PA 15213 \\
+  \texttt{hippo@cs.cranberry-lemon.edu} \\
+  %% examples of more authors
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \AND
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+}
+
 \begin{document} 
 
-\twocolumn[
-\icmltitle{Unsupervised Transductive Domain Adaptation}
-
-% It is OKAY to include author information, even for blind
-% submissions: the style file will automatically remove it for you
-% unless you've provided the [accepted] option to the icml2016
-% package.
-\icmlauthor{Ozan Sener}{ozansener@cs.stanford.edu}
-\icmladdress{Stanford University,
-		     Stanford, CA 94304, USA}
-		     \vspace{-2mm}
-\icmladdress{Cornell University,
-		     Ithaca, NY 14853, USA}
-\icmlauthor{Hyun Oh Song}{hsong@cs.stanford.edu}
-\icmladdress{Stanford University,
-		     Stanford, CA 94304, USA}
-
-\icmlauthor{Silvio Savarese}{ssilvio@stanford.edu}
-\icmladdress{Stanford University,
-		     Stanford, CA 94304, USA}
-\icmlauthor{Ashutosh Saxena}{ashutosh@brainoft.com}
-\icmladdress{Brain of Things,
-		     Cupertino, CA 94304, USA}
-
-
-% You may provide any keywords that you 
-% find helpful for describing your paper; these are used to populate 
-% the "keywords" metadata in the PDF but will not be shown in the document
-\icmlkeywords{domain adaptation, transductive learning, metric learning, deep learning}
-
-\vskip 0.3in
-]
+\maketitle
 
 \begin{abstract} 
 %<<<<<<< HEAD
@@ -129,6 +124,7 @@ To summarize, our main contribution is to formulate a joint optimization framewo
 \input{method.tex}
 
 
+
 \section{Experimental Results}
 \input{exp.tex}
 \section{Conclusion} 
@@ -140,7 +136,7 @@ We described a transductive approach to the unsupervised domain adaptation probl
 
 
 
-\clearpage
+%\clearpage
 \bibliography{domain_transduction}
 \bibliographystyle{icml2016}
 
