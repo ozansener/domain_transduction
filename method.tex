@@ -12,15 +12,11 @@ We further assume that both domains have different distributions $\xsi \sim p_s$
 % talk about cyclic consistency and structured consistency
 Our method is based on jointly learning the transferable domain specific representations for source and target points as well as estimating the labels of the unsupervised data-points. We denote these two main components of our method as transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. In order to solve this joint problem tractably, we exploit two heuristics; cyclic consistency for transduction and structured consistency for adaptation. 
 
-We use the 
-
-
-
 \textbf{Cyclic consistency:} One desired property of  $\Phi_s$ and $\Phi_t$ is their consistency. If we estimate the labels of the unsupervised data points and further use these points to estimate the labels of supervised data-points, we want the predicted labels of the supervised data-points to be consistent with the ground truth labels. Using inner product as an asymmetric similarity metric -$s(\xsi, \xuj) = \Phi_s(\xsi)^\intercal \Phi(\xuj)$-,
 
 \begin{displaymath}
     \xymatrix{
-        (\xsi,\ysi) \ar@{<-}@<-2pt>`d[r] `[rrrrrr]|{\textbf{Cyclic Consistency: $\ysi = \ysi^{pred}$}} [rrrrrr]  \ar[rrr]|{\textbf{Transduction}}     &&& (\xui, \yui) \ar[rrr]|{\textbf{Transduction}} &&&  (\xsi,\ysi^{pred}) }
+        (\xsi,\ysi) \ar@{<-}@<-2pt>`d[r] `[rrrrrr]|{\textbf{Cyclic Consistency: $\ysi = \ysi^{pred}$}} [rrrrrr]  \ar[rrr]|{\textbf{Transduction}}     &&& (\xuj, \yuj) \ar[rrr]|{\textbf{Transduction}} &&&  (\xsi,\ysi^{pred}) }
 \end{displaymath}
 
 It can be shown that; if the transduction from target to source follows a nearest neighbor rule, cyclic consistency can be enforced without explicitly computing $\ysi^{pred}$ using the large-margin nearest neighbor (LMNN)\cite{lmnn} rule. For each source point, we enforce a margin between its similarity with the nearest neighbor from the target having the same label and having a different label as; $ \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) > \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class as $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label. 
@@ -39,29 +35,29 @@ s.t. &\quad i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi
 \label{loss}
 \end{equation}
 where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise. $[a]_+$ is a rectifier function which is equal to $\max(0, a)$.
-
 \begin{wrapfigure}{r}{0.5\textwidth}
     \begin{minipage}{0.5\textwidth}
-    \vspace{-1cm}
+    \vspace{-1mm}
 \begin{algorithm}[H]
    \caption{Transduction with Domain Shift}
    \label{alg:example}
+  \small
 \begin{algorithmic}
-   \STATE {\bfseries Input:} source $\xsi,\ysi$, target $\xui$, batch size $B$
+   \STATE {\bfseries Input:} Source $\mathbf{\hat{x}}_{1 \cdots N^s},\hat{y}_{1, \cdots N^s}$, Target $\mathbf{x}_{1,\cdots,N^u}$, Batch Size $B$
    \REPEAT
    \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
    \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
    \FOR{$i=1$ {\bfseries to} $B$}
-      \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots B} $} 
+      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \neq \hat{y}_i, y_k \neq R$} 
    \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
    \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta_c}}$,  $\frac{\partial loss}{\partial \mathbf{\theta_s}}$, $\frac{\partial loss}{\partial \mathbf{\theta_t}}$
    \ENDIF
    \ENDFOR
-   \STATE $\mathbf{\theta} \leftarrow \mathbf{\theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}}$
+   \STATE $\mathbf{\theta_c} \leftarrow \mathbf{\theta_c} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta_c}}$, $\mathbf{\theta_s} \leftarrow \mathbf{\theta_s} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta_s}}$, $\mathbf{\theta_t} \leftarrow \mathbf{\theta_t} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta_t}}$
    \UNTIL CONVERGENCE or $MAX\_ITER$
 \end{algorithmic}
 \end{algorithm}
-\vspace{-1cm}
+\vspace{-17mm}
   \end{minipage}
   \end{wrapfigure}
 
@@ -93,7 +89,7 @@ We define our transduction sub-problem as:
 
 \begin{equation}
 \begin{aligned}
-\min_{y_1, \ldots y_{N^u} \in [Y] \cap R}  &\sum_{i \in N^u} l(\xui, y_i) + \lambda \sum_{i \in N^u} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_s(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
+\min_{y_1, \ldots y_{N^u} \in [Y] \cap R}  &\sum_{i \in N^u} l(\xui, y_i) + \lambda \sum_{i \in N^u} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
 \end{aligned}
 \label{robtran}
 \end{equation}
