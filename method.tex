@@ -43,7 +43,6 @@ where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $
 We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\theta_c,\theta_s,\theta_t$ (adaptation). We explain these two steps in detail in the following sections.
 
 
-\iffalse
 \begin{wrapfigure}{r}{0.5\textwidth}
     \begin{minipage}{0.5\textwidth}
     \vspace{-1cm}
@@ -51,12 +50,12 @@ We solve this optimization problem via alternating minimization through iteratin
    \caption{Transduction with Domain Shift}
    \label{alg:example}
 \begin{algorithmic}
-   \STATE {\bfseries Input:} source $\mathbf{x}_i$, target $\mathbf{\hat{x}}_i$, $y_i$, batch size $B$
+   \STATE {\bfseries Input:} source $\xsi,\ysi$, target $\xui$, batch size $B$
    \REPEAT
-   \STATE  Sample $\{\mathbf{x^b}_{1 \cdots B}\}$, $\{\mathbf{\hat{x}}^b_{1 \cdots B}, \hat{y}^b_{1\cdots B}\}$
+   \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
    \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
    \FOR{$i=1$ {\bfseries to} $B$}
-      \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots y_B} $} 
+      \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots B} $} 
    \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
    \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta}}$ and  $\frac{\partial loss}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
    \ENDIF
@@ -69,7 +68,6 @@ We solve this optimization problem via alternating minimization through iteratin
 \vspace{-1cm}
   \end{minipage}
   \end{wrapfigure}
-\fi
 
 
 
@@ -104,7 +102,7 @@ We define our transduction sub-problem as:
 where $l(\xui, y) = \left\{ \begin{array}{cc}  1 - \frac{k_y(\xui)}{k} & y \in [Y] \\ \gamma \max_{y^\prime \in [Y]} \frac{k_y^\prime(\xui)}{k}
  & y=R \end{array}\right.$ and $\gamma$ is relative cost of the reject option. 
  
-The $l(\xui,R)$ is smaller if none of the class has a majority, promoting reject option for undecided cases. We also modulate the $\gamma$ during learning to decrease number of reject options in the later stage of the adaptation. This problem can approximately be solved using many existing methods. We use the $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. In order to further explain the label propagation, we visualize an example with $k=4$ and $4$-class classification problem in Figure~\ref{vis_label_prop}. 
+The $l(\xui,R)$ is smaller if none of the class has a majority, promoting reject option for undecided cases. We also modulate the $\gamma$ during learning to decrease number of reject options in the later stage of the adaptation. This problem can approximately be solved using many existing methods. We use the $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. %In order to further explain the label propagation, we visualize an example with $k=4$ and $4$-class classification problem in Figure~\ref{vis_label_prop}. 
 
 \iffalse
 \begin{wrapfigure}{r}{0.5\textwidth}
@@ -127,7 +125,10 @@ Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to
 \min_{\theta_c,\theta_s,\theta_t} &\sum_{i \in [N^s]} [\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) -\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) + \alpha]_{+} \\
 \end{aligned}
 \end{equation}
-where $i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \quad  \text{and} \quad   i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i, y_j \neq R}  \Phi_s(\xsi)^\intercal \Phi_t(\xuj)$
+where 
+\begin{equation}
+$i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \quad  \text{and} \quad   i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i, y_j \neq R}  \Phi_s(\xsi)^\intercal \Phi_t(\xuj)$
+\end{equation}
 
 This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation assuming $i^{+}$ and $i^{-}$ are given before the adaptation stage..
 %\begin{equation}
