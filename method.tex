@@ -43,7 +43,7 @@ where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $
    \label{alg:example}
   \small
 \begin{algorithmic}
-   \STATE {\bfseries Input:} Source $\mathbf{\hat{x}}_{1 \cdots N^s},\hat{y}_{1, \cdots N^s}$, Target $\mathbf{x}_{1,\cdots,N^u}$, Batch Size $B$
+   \STATE {\bfseries Input:} Source $\mathbf{\hat{x}}_{1 \cdots N^s},\hat{y}_{1, \cdots N^s}$, Target $\mathbf{x}_{1,\cdots,N^u}$, Batch Size $2\times B$
    \REPEAT
    \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
    \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
