@@ -30,7 +30,7 @@ Our Method (full) & $\mathbf{.814}$ & $\mathbf{.971}$ & $\mathbf{.993}$ & $\math
 \end{small}
 \end{center}
 \end{sc}
-
+\vspace{-5mm}
 \end{table*}
 
 \subsection{Dataset}
@@ -59,7 +59,7 @@ Our Method & $\mathbf{.835}$ & $\mathbf{.855}$ & $\mathbf{.774}$ & $\mathbf{.323
 \end{sc}
 \end{wraptable}
 
-In addition, we use the Office~\cite{office} dataset to evaluate our algorithm on the object recognition task. Office dataset includes images of the objects taken from Amazon, captured with a webcam and captured with a D-SLR. Differences between domains include the white background of Amazon images vs realistic backgrounds of webcam images, and the resolution differences. The Office dataset has fewer images, with a maximum of 2478 per domain with 31 classes. %On the other hand, it has larger number of classes over 31 categories.
+In addition, we use the Office~\cite{office} dataset to evaluate our algorithm on the object recognition task. Office dataset includes images of the objects taken from Amazon, captured with a webcam and captured with a D-SLR. Differences between domains include the white background of Amazon images vs realistic webcam images, and the resolution differences. The Office dataset has fewer images, with a maximum of 2478 per domain over 31 classes. %On the other hand, it has larger number of classes over 31 categories.
 
 \subsection{Baselines}
 We compare our method with a variety of methods with and without feature learning. Considering the two different lines of work, \textbf{SA*}\cite{fernando13} is the dominant state-of-the-art approach not employing any feature learning, and \textbf{Backprop(BP)}\cite{ganin15} is the dominant state-of-the-art employing feature learning. We use the available source code of \cite{ganin15} and \cite{fernando13} and following the evaluation procedure in \cite{ganin15}, we choose the hyper-parameter of \cite{fernando13} as the highest performing one among various alternatives. We also compare our method with the \textbf{source only} baseline which is a convolutional neural network trained only using the source data. This classifier is clearly different from our nearest neighbor classifier; however, we experimentally validated that CNN always outperformed the nearest neighbor based classifier. Hence, we report the highest performing source only method.
@@ -68,15 +68,9 @@ We compare our method with a variety of methods with and without feature learnin
 \label{imp_det}
 Although our algorithm has very few hyper-parameters and we choose most of them either using cross-validation or exhaustive grid search, our algorithm uses an existing differentiable feature function. Following the unparalleled success of convolutional neural networks (CNNs), we use CNNs as our feature functions.  We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains:
 
-\noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as
+\noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as; \includegraphics[width=0.5\columnwidth]{lenet}
 
-\includegraphics[width=\columnwidth]{lenet}
-
-
-\noindent \textbf{Office:} AlexNet\cite{alexnet} as
-
-\includegraphics[width=\columnwidth]{alexnet}
-
+\noindent \textbf{Office:} AlexNet\cite{alexnet} as; \includegraphics[width=0.55\columnwidth]{alexnet}
 
 where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU and \textbf{F} is fully connected layer. 
 
@@ -107,27 +101,29 @@ Another interesting conclusion is the asymmetric nature of the results. For exam
 \subsubsection{Qualitative Analysis}
 To further study the learned representations as well as the similarity metric, we perform a series of qualitative analysis in the form of nearest neighbor analyses and tSNE\cite{tsne} plots.
 
+
 In Figure~\ref{fig:nn}, we visualize example target images from MNIST and their corresponding source images. First of all, both our experimental procedure and qualitative analysis suggest that MNIST and SVHN are the two domains with the largest difference. Hence, we believe MNIST$\leftrightarrow$SVHN is very challenging set-up and despite the huge visual differences, our algorithm results in accurate nearest neighbors.
 
 In Figure~\ref{fig:nnoffice},  we visualize example target images from webcam and their corresponding nearest source images from Amazon. The accuracy of the domain adaptation is also visible in this task. 
 
-\begin{wrapfigure}{r}{0.5\textwidth}
+The difference between invariance and equivariance is more clear in the tSNE plots of the Office dataset in Figure~\ref{fig:tsne} as well as digit classification task Figure~\ref{fig:tsnedigit}. In Figure~\ref{fig:tsne}, we plot the distribution of features before and after adaptation for source and target while color coding class labels. As Figure~\ref{fig:tsne} suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain features have no structure before adaptation. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also get clustered according to the object classes. 
+
+\begin{wrapfigure}{r}{0.4\textwidth}
 \begin{small}
-\includegraphics[width=0.5\textwidth]{nndig}
+\includegraphics[width=0.4\textwidth]{nndig}
 \vspace{-5mm}
 \caption{Example nearest neighbors for SVHN$\rightarrow$MNIST experiment. We show an example MNIST image and 5-NN SVHN images. Please note the large domain difference.}
 \label{fig:nn}
 %\end{figure}
 %\begin{figure}[ht]
-\includegraphics[width=0.5\textwidth]{nnfi-01.png}
-\caption{Example nearest neighbors for Amazon$\leftrightarrow$Webcam experiment. We show an example source image and 3-NN target images. The drop in the accuracy after the nearest neighbors is expected since our loss function only models the nearest one.}
+\includegraphics[width=0.4\textwidth]{nnfi-01.png}
+\caption{Example nearest neighbors for Amazon$\leftrightarrow$Webcam experiment. We show an example source image and 3-NN target images. }
+%The drop in the accuracy after the nearest neighbors is expected since our loss function only models the nearest one.}
 \label{fig:nnoffice}
 \end{small}
 \vspace{-1cm}
 \end{wrapfigure}
 
-
-The difference between invariance and equivariance is more clear in the tSNE plots of the Office dataset in Figure~\ref{fig:tsne} as well as digit classification task Figure~\ref{fig:tsnedigit}. In Figure~\ref{fig:tsne}, we plot the distribution of features before and after adaptation for source and target while color coding class labels. As Figure~\ref{fig:tsne} suggests, the source domain is well clustered according to the object classes with and without adaptation. Moreover, this is expected since the features are specifically fine-tuned to the source domain before the adaptation starts. However, target domain features have no structure before adaptation. This is also expected since the algorithm did not see any image from the target domain. After the adaptation, target images also get clustered according to the object classes. 
 
 
 In Figure~\ref{fig:tsnedigit}, we show the digit images of source and target after the adaptation. Clearly, the target is well clustered according to the classes and source is not very well clustered although it has some structure. Since we learn the entire network for digit classification, our networks learn discriminative features in target domain as our loss depends directly on classification scores in target domain. Moreover, discriminative features in target arises because of the transductive modeling. In comparison, state of the art domain invariance based algorithms only try to be invariant to the domains without explicit modeling of discriminativeness on the target domain. Hence, our similarity metric explicitly models the relationship between the domains and results in an equivariant model while enforcing discriminative behavior in the target. We also draw lines between the nearest neighbor images of source and target images to show the accuracy of the metric function. Moreover, the nearest neighbors are quite accurate confirming the quantitative results. 
