@@ -4,7 +4,7 @@
 
 \subsection{Problem Definition and Notation}
 \label{prob:def}
-In the unsupervised domain adaptation problem, one of the domains (source) is fully supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \{1,\ldots, Y \}$.  The other domain (target), on the other hand is unsupervised and has $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
+In unsupervised domain adaptation problem, one of the domains (source) is supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \mathcal{Y} = \{1,\ldots, Y \}$.  The other domain (target), on the other hand is unsupervised and has $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
 
 We further assume that both domains have different distributions $\xsi \sim p_s$ and $\xui \sim p_t$ defined on the same space as $\xsi,\xui \in \mathcal{X}$. We consider a case in which there are two feature functions  \mbox{$\Phi_s, \Phi_t:\mathcal{X}\rightarrow \mathcal{R}^d$} applicable to source and target separately. These feature functions extracts both the information shared among domains and explicit to the individual ones. The way we model common features is sharing a subset of parameters between feature functions as \mbox{$\Phi_s=\Phi_{\theta_c,\theta_s}$} and \mbox{$\Phi_t=\Phi_{\theta_c,\theta_t}$}. We use deep neural networks to implement these functions and in our implementation $\theta_c$ corresponds to the parameters in the first few layers of the networks and $\theta_s$, $\theta_t$ corresponds to the respective final layers. In general, our model to applicable any hierarchical and differentiable feature function which can be expressed as a composite function $\Phi_s = f_{\theta_s}(g_{\theta_c}(\cdot))$ for source and similarly for target.
 
@@ -48,7 +48,7 @@ where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $
    \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
    \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
    \FOR{$i=1$ {\bfseries to} $B$}
-      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \neq \hat{y}_i, y_k \neq R$} 
+      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \in \mathcal{Y} /\hat{y}_i$} 
    \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
    \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta_c}}$,  $\frac{\partial loss}{\partial \mathbf{\theta_s}}$, $\frac{\partial loss}{\partial \mathbf{\theta_t}}$
    \ENDIF
@@ -89,12 +89,12 @@ We define our transduction sub-problem as:
 
 \begin{equation}
 \begin{aligned}
-\min_{y_1, \ldots y_{N^u} \in [Y] \cap R}  &\sum_{i \in N^u} l(\xui, y_i) + \lambda \sum_{i \in N^u} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
+\min_{y_1, \ldots y_{N^u} \in \mathcal{Y} \cap R}  &\sum_{i \in [N^u]} l(\xui, y_i) + \lambda \sum_{i \in [N^u]} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
 \end{aligned}
 \label{robtran}
 \end{equation}
 
-where $l(\xui, y) = \left\{ \begin{array}{cc}  1 - \frac{k_y(\xui)}{k} & y \in [Y] \\ \gamma \max_{y^\prime \in [Y]} \frac{k_y^\prime(\xui)}{k}
+where $l(\xui, y) = \left\{ \begin{array}{cc}  1 - \frac{k_y(\xui)}{k} & y \in \mathcal{Y} \\ \gamma \max_{y^\prime \in \mathcal{Y}} \frac{k_y^\prime(\xui)}{k}
  & y=R \end{array}\right.$ and $\gamma$ is relative cost of the reject option. 
  
 The $l(\xui,R)$ is smaller if none of the class has a majority, promoting reject option for undecided cases. We also modulate the $\gamma$ during learning to decrease number of reject options in the later stage of the adaptation. This problem can approximately be solved using many existing methods. We use the $\alpha$-$\beta$ swapping algorithm from \cite{kolmogrovalphabeta} since it is experimentally shown to be efficient and accurate. %In order to further explain the label propagation, we visualize an example with $k=4$ and $4$-class classification problem in Figure~\ref{vis_label_prop}. 
