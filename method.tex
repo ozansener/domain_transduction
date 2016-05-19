@@ -40,9 +40,6 @@ s.t. &\quad i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi
 \end{equation}
 where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise. $[a]_+$ is a rectifier function which is equal to $\max(0, a)$.
 
-We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\theta_c,\theta_s,\theta_t$ (adaptation). We explain these two steps in detail in the following sections.
-
-
 \begin{wrapfigure}{r}{0.5\textwidth}
     \begin{minipage}{0.5\textwidth}
     \vspace{-1cm}
@@ -57,10 +54,9 @@ We solve this optimization problem via alternating minimization through iteratin
    \FOR{$i=1$ {\bfseries to} $B$}
       \IF{$ \hat{y}_i \textbf{ in } y_{1 \cdots B} $} 
    \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
-   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta}}$ and  $\frac{\partial loss}{\partial \mathbf{W}} $ using (\ref{gradw},\ref{gradt})
+   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta_c}}$,  $\frac{\partial loss}{\partial \mathbf{\theta_s}}$, $\frac{\partial loss}{\partial \mathbf{\theta_t}}$
    \ENDIF
    \ENDFOR
-   \STATE $\mathbf{W} \leftarrow \mathbf{W} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{W}}$ 
    \STATE $\mathbf{\theta} \leftarrow \mathbf{\theta} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta}}$
    \UNTIL CONVERGENCE or $MAX\_ITER$
 \end{algorithmic}
@@ -68,6 +64,9 @@ We solve this optimization problem via alternating minimization through iteratin
 \vspace{-1cm}
   \end{minipage}
   \end{wrapfigure}
+
+
+We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\theta_c,\theta_s,\theta_t$ (adaptation). We explain these two steps in detail in the following sections.
 
 
 
@@ -127,7 +126,8 @@ Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to
 \end{equation}
 where 
 \begin{equation}
-$i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \quad  \text{and} \quad   i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i, y_j \neq R}  \Phi_s(\xsi)^\intercal \Phi_t(\xuj)$
+i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \quad  \text{and} \quad   i^{-} = {\arg\max}_{j | y_j \neq \hat{y}_i, y_j \neq R}  \Phi_s(\xsi)^\intercal \Phi_t(\xuj)
+\label{sup_nn}
 \end{equation}
 
 This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation assuming $i^{+}$ and $i^{-}$ are given before the adaptation stage..
