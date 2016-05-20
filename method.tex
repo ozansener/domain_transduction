@@ -78,12 +78,9 @@ The $l(\xui,R)$ is smaller if none of the class has a majority, promoting reject
 \end{wrapfigure}
 \fi
 
-
-It is also critical that this formulation requires solving high number of nearest neighbors which is computationally challenging. Fortunately, we use stochastic gradient descent in our adaptation stage with a carefully chosen batch size, which requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
-
 \subsection{Adaptation: Learning the Metric}
 \label{metric}
-Given the predicted labels $y_i$ for unsupervised data points $\xui$, we need to learn an asymmetric metric in order to minimize the loss function defined in (\ref{loss}). Following the cyclic consistency construction, the LMNN rule can be represented using the triplet loss defined with supervised data points and their closest same class and different class neighbors among the unsupervised points. We do not include the target-data points with reject label during this construction. Formally, we can define the adaptation problem given unsupervised labels as;
+Given the predicted labels $y_i$ for unsupervised data points $\xui$, we can then learn a metric in order to minimize the loss function defined in (\ref{loss}). Following the cyclic consistency construction, the LMNN rule can be represented using the triplet loss defined between the supervised source data points and their nearest positive and negative neighbors among the unsupervised target points. We do not include the target-data points with reject label during this construction. Formally, we can define the adaptation problem given unsupervised labels as;
 \begin{equation}
 \begin{aligned}
 \min_{\theta_c,\theta_s,\theta_t} &\sum_{i \in [N^s]} [\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) -\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) + \alpha]_{+} \\
@@ -138,7 +135,7 @@ This minimization is convex if feature functions are convex. This is typically n
 
 \subsection{Implementation Details}
 \label{imp_det}
-We use Convolutional Neural Networks (CNNs) as our feature functions. Specifically, we use Alexnet~\cite{alexnet} and LeNet~\cite{lenet} architectures with small modifications. We remove their final softmax layer and change the size of the final fully connected layer according to the desired feature dimension. We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains, and the final layers are learned separately. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} only modifying the final feature dimensionality (embedding size). Explicitly, we use the following architectures for domains:
+We use Alexnet~\cite{alexnet} and LeNet~\cite{lenet} architectures with small modifications. We remove their final softmax layer and change the size of the final fully connected layer according to the desired feature dimension. We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains, and the final layers are learned separately. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} only modifying the final feature dimensionality (embedding size). Explicitly, we use the following architectures for domains:
 
 \noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as; \includegraphics[width=0.40\columnwidth]{lenet}
 
