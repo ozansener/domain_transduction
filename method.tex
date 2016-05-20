@@ -6,7 +6,7 @@
 \label{prob:def}
 In unsupervised domain adaptation problem, one of the domains (source) is supervised $\{\xsi, \ysi \}_{i \in [N^s]}$ with $N^s$ data points $\xsi$ and corresponding labels $\ysi$ from a discrete set $\ysi \in \mathcal{Y} = \{1,\ldots, Y \}$.  The other domain (target), on the other hand is unsupervised and has $N^u$ data points $\{\xui \}_{i \in [N^u]}$. 
 
-We further assume that both domains have different distributions $\xsi \sim p_s$ and $\xui \sim p_t$ defined on the same space as $\xsi,\xui \in \mathcal{X}$. We consider a case in which there are two feature functions  \mbox{$\Phi_s, \Phi_t:\mathcal{X}\rightarrow \mathcal{R}^d$} applicable to source and target separately. These feature functions extracts both the information shared among domains and explicit to the individual ones. The way we model common features is sharing a subset of parameters between feature functions as \mbox{$\Phi_s=\Phi_{\theta_c,\theta_s}$} and \mbox{$\Phi_t=\Phi_{\theta_c,\theta_t}$}. We use deep neural networks to implement these functions and in our implementation $\theta_c$ corresponds to the parameters in the first few layers of the networks and $\theta_s$, $\theta_t$ corresponds to the respective final layers. In general, our model is applicable any hierarchical and differentiable feature function which can be expressed as a composite function $\Phi_s = f_{\theta_s}(g_{\theta_c}(\cdot))$ for source and similarly for target.
+We further assume that both domains have different distributions $\xsi \sim p_s$ and $\xui \sim p_t$ defined on the same space as $\xsi,\xui \in \mathcal{X}$. We consider a case in which there are two feature functions  \mbox{$\Phi_s, \Phi_t:\mathcal{X}\rightarrow \mathcal{R}^d$} applicable to source and target separately. These feature functions extracts both the information shared among domains and explicit to the individual ones. The way we model common features is by sharing a subset of parameters between feature functions as \mbox{$\Phi_s=\Phi_{\theta_c,\theta_s}$} and \mbox{$\Phi_t=\Phi_{\theta_c,\theta_t}$}. We use deep neural networks to implement these functions and in our implementation $\theta_c$ corresponds to the parameters in the first few layers of the networks and $\theta_s$, $\theta_t$ corresponds to the respective final layers. In general, our model is applicable any hierarchical and differentiable feature function which can be expressed as a composite function $\Phi_s = f_{\theta_s}(g_{\theta_c}(\cdot))$ for source and similarly for target.
 
 \subsection{Consistent Structured Transduction}
 % talk about cyclic consistency and structured consistency
@@ -19,10 +19,10 @@ Our method is based on jointly learning the transferable domain specific represe
         (\xsi,\ysi) \ar@{<-}@<-2pt>`d[r] `[rrrrrr]|{\textbf{Cyclic Consistency: $\ysi = \ysi^{pred}$}} [rrrrrr]  \ar[rrr]|{\textbf{Transduction}}     &&& (\xuj, \yuj) \ar[rrr]|{\textbf{Transduction}} &&&  (\xsi,\ysi^{pred}) }
 \end{displaymath}
 
-It can be shown that; if the transduction from target to source follows a nearest neighbor rule, cyclic consistency can be enforced without explicitly computing $\ysi^{pred}$ using the large-margin nearest neighbor (LMNN)\cite{lmnn} rule. For each source point, we enforce a margin between its similarity with the nearest neighbor from the target having the same label and having a different label as; $ \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) > \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class as $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label. 
+It can be shown that; if the transduction from target to source follows a nearest neighbor rule, cyclic consistency can be enforced without explicitly computing $\ysi^{pred}$ using the large-margin nearest neighbor (LMNN)\cite{lmnn} rule. For each source point, we enforce a margin between its similarity with the nearest neighbor from the target having the same label and having a different label as; $ \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) > \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class label as $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label. 
 
 
-\textbf{Structured consistency:} We enforce a consistency in labelling of the target data-points during the transduction. In other words, if two target data-points are similar to each other, they are more likely to have same label. To enforce this consistency, we create a k-NN graph of target data points using a similarity metric $\Phi_t(\xui)^\intercal \Phi_t(\xuj)$. We denote the neighbors of the point $\xsi$ as $\mathcal{N}(\xsi)$. We enforce structured consistency by penalizing neighbor points of same labels with their similarity score. 
+\textbf{Structured consistency:} We enforce a structured consistency when we label the target data-points during the transduction. In other words, if two target data-points are similar to each other, they are more likely to have same label. To enforce this consistency, we create a k-NN graph of target data points using a similarity metric $\Phi_t(\xui)^\intercal \Phi_t(\xuj)$. We denote the neighbors of the point $\xsi$ as $\mathcal{N}(\xsi)$. We enforce structured consistency by penalizing neighbor points of same labels with their similarity score. 
 
 Our model leads to the following optimization problem, over the target labels $\yui$ and the feature function parameters $\theta_c, \theta_s, \theta_t$, jointly solving transduction and adaptation. 
 \begin{equation}
@@ -49,19 +49,15 @@ We solve this optimization problem via alternating minimization through iteratin
 \subsection{Transduction: Labeling Target Domain}
 \label{label}
 In order to label the unsupervised points, we use the k-nearest-neighbor rule. We simply compute the k-NN supervised data point for each unsupervised data point using the learned metric and transfer the corresponding majority label. Formally, given a similarity metric $\theta_c, \theta_s, \theta_t$, the k-NN rule is 
-$(y_i)^{pred} = \arg\max_y \frac{k_y(\xui)}{k}$ where $k_y(\xui)$ is the number of samples having label $y$ in the $k$ nearest neighbor of $\xui$ from the source set. 
+$(y_i)^{pred} = \arg\max_y \frac{k_y(\xui)}{k}$ where $k_y(\xui)$ is the number of samples having label $y$ in the $k$ nearest neighbor of $\xui$ from the source domain. One major issue with this approach is the accuracy of transduction during the initial stage of the algorithm. Since the learned metric will not be accurate, we expect to see some noisy k-NN sets. Hence, we propose two solutions to solve this problem.
 
-One major issue with this approach is the accuracy of transduction during the initial stage of the algorithm. Since the learned metric will not be accurate, we expect to see some noisy k-NN sets. Hence, we propose two solutions to solve this problem.
+\textbf{Structured Consistency:} Similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points and penalize disagreements of labels between neighbors.
 
-\textbf{Structured Consistency:} We use label propagation to enforce consistency of the predicted labels of unsupervised data points. Similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points and penalize disagreements of labels between neighbors.
-
-\textbf{Reject option:} In the initial stage of the algorithm, we let transduction step to use reject $R$ as a label to unsupervised target points. In other words, our transduction algorithm can decide to not label some of the points so that they will not be used for adaptation. When the learned metric gets more accurate in the future iterations, transduction algorithm can label these rejected points.
-
-We define our transduction sub-problem as:
+\textbf{Reject option:} In the initial stage of the algorithm, we let the transduction step to use reject $R$ as an additional label (besides the class labels) to label the unsupervised target points. In other words, our transduction algorithm can decide to not label (reject) some of the points so that they will not be used for adaptation. When the learned metric gets more accurate in the future iterations, transduction algorithm can change the label from R to other class labels. We define our transduction sub-problem as:
 
 \begin{equation}
 \begin{aligned}
-\min_{y_1, \ldots y_{N^u} \in \mathcal{Y} \cap R}  &\sum_{i \in [N^u]} l(\xui, y_i) + \lambda \sum_{i \in [N^u]} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
+\min_{y_1, \ldots y_{N^u} \in \mathcal{Y} \cup R}  &\sum_{i \in [N^u]} l(\xui, y_i) + \lambda \sum_{i \in [N^u]} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
 \end{aligned}
 \label{robtran}
 \end{equation}
