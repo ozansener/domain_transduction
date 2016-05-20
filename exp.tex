@@ -66,7 +66,7 @@ We compare our method with a variety of methods with and without feature learnin
 
 \subsection{Implementation Details}
 \label{imp_det}
-Although our algorithm has very few hyper-parameters and we choose most of them either using cross-validation or exhaustive grid search, our algorithm uses an existing differentiable feature function. Following the unparalleled success of convolutional neural networks (CNNs), we use CNNs as our feature functions.  We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains:
+We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} by only changing the final feature dimensionality (embedding size). We use the following architectures for domains:
 
 \noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as; \includegraphics[width=0.5\columnwidth]{lenet}
 
