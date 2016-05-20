@@ -10,9 +10,9 @@ We further assume that both domains have different distributions $\xsi \sim p_s$
 
 \subsection{Consistent Structured Transduction}
 % talk about cyclic consistency and structured consistency
-Our method is based on jointly learning the transferable domain specific representations for source and target points as well as estimating the labels of the unsupervised data-points. We denote these two main components of our method as transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. In order to solve this joint problem tractably, we exploit two heuristics; cyclic consistency for transduction and structured consistency for adaptation. 
+Our method is based on jointly learning the transferable domain specific representations for source and target points as well as estimating the labels of the unsupervised data-points. We denote these two main components of our method as transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. In order to solve this joint problem tractably, we exploit two heuristics; cyclic consistency for adaptation and structured consistency for transduction. 
 
-\textbf{Cyclic consistency:} One desired property of  $\Phi_s$ and $\Phi_t$ is their consistency. If we estimate the labels of the unsupervised data points and further use these points to estimate the labels of supervised data-points, we want the predicted labels of the supervised data-points to be consistent with the ground truth labels. Using inner product as an asymmetric similarity metric -$s(\xsi, \xuj) = \Phi_s(\xsi)^\intercal \Phi_t(\xuj)$-,
+\textbf{Cyclic consistency:} One desired property of  $\Phi_s$ and $\Phi_t$ is their consistency. If we estimate the labels of the unsupervised data points and further use these points with their estimated labels to estimate the labels of supervised data-points, we want the predicted labels of the supervised data-points to be consistent with the ground truth labels. Using inner product as an asymmetric similarity metric -$s(\xsi, \xuj) = \Phi_s(\xsi)^\intercal \Phi_t(\xuj)$- this consistency can be represented with the following diagram.
 
 \begin{displaymath}
     \xymatrix{
@@ -22,7 +22,7 @@ Our method is based on jointly learning the transferable domain specific represe
 It can be shown that; if the transduction from target to source follows a nearest neighbor rule, cyclic consistency can be enforced without explicitly computing $\ysi^{pred}$ using the large-margin nearest neighbor (LMNN)\cite{lmnn} rule. For each source point, we enforce a margin between its similarity with the nearest neighbor from the target having the same label and having a different label as; $ \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) > \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class label as $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label. 
 
 
-\textbf{Structured consistency:} We enforce a structured consistency when we label the target data-points during the transduction. In other words, if two target data-points are similar to each other, they are more likely to have same label. To enforce this consistency, we create a k-NN graph of target data points using a similarity metric $\Phi_t(\xui)^\intercal \Phi_t(\xuj)$. We denote the neighbors of the point $\xsi$ as $\mathcal{N}(\xsi)$. We enforce structured consistency by penalizing neighbor points of same labels with their similarity score. 
+\textbf{Structured consistency:} We enforce a structured consistency when we label the target data-points during the transduction. In other words, if two target data-points are similar to each other, they are more likely to have same label. To enforce this consistency, we create a k-NN graph of target data points using a similarity metric $\Phi_t(\xui)^\intercal \Phi_t(\xuj)$. We denote the neighbors of the point $\xsi$ as $\mathcal{N}(\xsi)$. We enforce structured consistency by penalizing neighbor points of different labels proportional to their similarity score. 
 
 Our model leads to the following optimization problem, over the target labels $\yui$ and the feature function parameters $\theta_c, \theta_s, \theta_t$, jointly solving transduction and adaptation. 
 \begin{equation}
@@ -48,12 +48,14 @@ We solve this optimization problem via alternating minimization through iteratin
 
 \subsection{Transduction: Labeling Target Domain}
 \label{label}
-In order to label the unsupervised points, we use the k-nearest-neighbor rule. We simply compute the k-NN supervised data point for each unsupervised data point using the learned metric and transfer the corresponding majority label. Formally, given a similarity metric $\theta_c, \theta_s, \theta_t$, the k-NN rule is 
+In order to label the unsupervised points, we base our model on the k-nearest-neighbor rule. We simply compute the k-NN supervised data point for each unsupervised data point using the learned metric and transfer the corresponding majority label. Formally, given a similarity metric $\theta_c, \theta_s, \theta_t$, the k-NN rule is 
 $(y_i)^{pred} = \arg\max_y \frac{k_y(\xui)}{k}$ where $k_y(\xui)$ is the number of samples having label $y$ in the $k$ nearest neighbor of $\xui$ from the source domain. One major issue with this approach is the accuracy of transduction during the initial stage of the algorithm. Since the learned metric will not be accurate, we expect to see some noisy k-NN sets. Hence, we propose two solutions to solve this problem.
 
 \textbf{Structured Consistency:} Similar to existing graph transduction algorithms \cite{label_prop1,label_prop2}, we create a k-nearest neighbor (k-NN) graph over the unsupervised data points and penalize disagreements of labels between neighbors.
 
-\textbf{Reject option:} In the initial stage of the algorithm, we let the transduction step to use reject $R$ as an additional label (besides the class labels) to label the unsupervised target points. In other words, our transduction algorithm can decide to not label (reject) some of the points so that they will not be used for adaptation. When the learned metric gets more accurate in the future iterations, transduction algorithm can change the label from R to other class labels. We define our transduction sub-problem as:
+\textbf{Reject option:} In the initial stage of the algorithm, we let the transduction step to use reject $R$ as an additional label (besides the class labels) to label the unsupervised target points. In other words, our transduction algorithm can decide to not label (reject) some of the points so that they will not be used for adaptation. When the learned metric gets more accurate in the future iterations, transduction algorithm can change the label from R to other class labels. 
+
+Using aforementioned heuristics, we define our transduction sub-problem as:
 
 \begin{equation}
 \begin{aligned}
@@ -101,7 +103,7 @@ i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \qu
 %\sum_{i \in [N^s]} \mathds{1}(\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) - \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) < \alpha) \left[ \left(\frac{\partial \Phi_t(\mathbf{x}_{i^+})^\intercal}{\theta_t} - \frac{\partial \Phi_t(\mathbf{x}_{i^-})^\intercal}{\theta_t} \right)  \Phi_s(\xsi) \right]
 %\end{equation}
 
-This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation \emph{(see supplementary material for details)}.
+This minimization is convex if feature functions are convex. This is typically not the case with convolutional neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation \emph{(see supplementary material for details)}.
 
 
 \subsection{Implementation Details}
