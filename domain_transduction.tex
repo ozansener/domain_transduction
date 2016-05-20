@@ -4,6 +4,7 @@
 
 \usepackage{nips_2016} 
 \usepackage{xspace}
+\usepackage{setspace}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -154,9 +155,11 @@ Experimental results on digit classification using MNIST\cite{mnist} and SVHN\ci
 
 
 \clearpage
-\setlength{\bibsep}{2.5pt plus 0.25ex}
+\setlength{\bibsep}{2pt plus 0.25ex}
+\begin{spacing}{0.95}
 {\small
 \bibliography{domain_transduction}
 \bibliographystyle{abbrv}
 }
+\end{spacing}
 \end{document} 
