@@ -1,4 +1,4 @@
-% !TEX root = domain_transduction.tex;
+% !TEX root = domain_transduction.tex
 We evaluate our algorithm on various unsupervised domain adaptation tasks while focusing on two different problems: hand-written digit classification and object recognition.
 
 %\subsection{Datasets and Baselines}
@@ -12,7 +12,7 @@ In addition, we use the Office~\cite{office} dataset to evaluate our algorithm o
 \noindent \textbf{Baselines:} We compare our method against a variety of methods with and without feature learning. \textbf{SA*}\cite{fernando13} is the dominant state-of-the-art approach not employing any feature learning, and \textbf{Backprop(BP)}\cite{ganin15} is the dominant state-of-the-art employing feature learning. We use the available source code of \cite{ganin15} and \cite{fernando13} and following the evaluation procedure in \cite{ganin15}, we choose the hyper-parameter of \cite{fernando13} as the highest performing one among various alternatives. We also compare our method with the \textbf{source only} baseline which is a convolutional neural network trained only using the source data. This classifier is clearly different from our nearest neighbor classifier; however, we experimentally validated that the CNN always outperformed the nearest neighbor based classifier. Hence, we report the highest performing source only method.
 
 \vspace{2mm}
-\noindent \textbf{Evaluation:} We evaluate all algorithms in a \emph{fully transductive} setup.  We feed training images and labels of the first domain as the source and training images of the second domain as the target. We evaluate the accuracy on the target domain as the ratio of correctly labeled images to all target images.
+\noindent \textbf{Evaluation:} We evaluate all algorithms in a \emph{fully transductive} setup \cite{gong2012}.  We feed training images and labels of first domain as the source and training images of the second domain as the target. We evaluate the accuracy on the target domain as the ratio of correctly labeled images to all target images.
 
 
 
