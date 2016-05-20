@@ -12,7 +12,7 @@ We further assume that both domains have different distributions $\xsi \sim p_s$
 % talk about cyclic consistency and structured consistency
 Our method is based on jointly learning the transferable domain specific representations for source and target points as well as estimating the labels of the unsupervised data-points. We denote these two main components of our method as transduction and adaptation. The transduction is the sub-problem of labelling unsupervised data points and the adaptation is solving for the domain shift. In order to solve this joint problem tractably, we exploit two heuristics; cyclic consistency for transduction and structured consistency for adaptation. 
 
-\textbf{Cyclic consistency:} One desired property of  $\Phi_s$ and $\Phi_t$ is their consistency. If we estimate the labels of the unsupervised data points and further use these points to estimate the labels of supervised data-points, we want the predicted labels of the supervised data-points to be consistent with the ground truth labels. Using inner product as an asymmetric similarity metric -$s(\xsi, \xuj) = \Phi_s(\xsi)^\intercal \Phi(\xuj)$-,
+\textbf{Cyclic consistency:} One desired property of  $\Phi_s$ and $\Phi_t$ is their consistency. If we estimate the labels of the unsupervised data points and further use these points to estimate the labels of supervised data-points, we want the predicted labels of the supervised data-points to be consistent with the ground truth labels. Using inner product as an asymmetric similarity metric -$s(\xsi, \xuj) = \Phi_s(\xsi)^\intercal \Phi_t(\xuj)$-,
 
 \begin{displaymath}
     \xymatrix{
@@ -22,7 +22,7 @@ Our method is based on jointly learning the transferable domain specific represe
 It can be shown that; if the transduction from target to source follows a nearest neighbor rule, cyclic consistency can be enforced without explicitly computing $\ysi^{pred}$ using the large-margin nearest neighbor (LMNN)\cite{lmnn} rule. For each source point, we enforce a margin between its similarity with the nearest neighbor from the target having the same label and having a different label as; $ \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) > \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) + \alpha$ where $\mathbf{x}_{i^+}$ is the nearest target having the same class as $\xsi$ and $\mathbf{x}_{i^-}$ is the nearest target having a different class label. 
 
 
-\textbf{Structured consistency:} We enforce a consistency in labelling of the target data-points during the transduction. In other words, if two target data-points are similar to each other, they are more likely to have same label. In order to enforce this consistency, we create a k-NN graph of target data points using a similarity metric $\Phi_t(\xui)^\intercal \Phi_t(\xuj)$. We denote the neighbors of the point $\xsi$ as $\mathcal{N}(\xsi)$. We enforce structured consistency by penalizing neighbor points of same labels with their similarity score. 
+\textbf{Structured consistency:} We enforce a consistency in labelling of the target data-points during the transduction. In other words, if two target data-points are similar to each other, they are more likely to have same label. To enforce this consistency, we create a k-NN graph of target data points using a similarity metric $\Phi_t(\xui)^\intercal \Phi_t(\xuj)$. We denote the neighbors of the point $\xsi$ as $\mathcal{N}(\xsi)$. We enforce structured consistency by penalizing neighbor points of same labels with their similarity score. 
 
 Our model leads to the following optimization problem, over the target labels $\yui$ and the feature function parameters $\theta_c, \theta_s, \theta_t$, jointly solving transduction and adaptation. 
 \begin{equation}
@@ -35,37 +35,9 @@ s.t. &\quad i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi
 \label{loss}
 \end{equation}
 where $\mathds{1}(a)$ is an indicator function which is $1$ if $a$ is true and $0$ otherwise. $[a]_+$ is a rectifier function which is equal to $\max(0, a)$.
-\begin{wrapfigure}{r}{0.5\textwidth}
-    \begin{minipage}{0.5\textwidth}
-    \vspace{-1mm}
-\begin{algorithm}[H]
-   \caption{Transduction with Domain Shift}
-   \label{alg:example}
-  \small
-\begin{algorithmic}
-   \STATE {\bfseries Input:} Source $\mathbf{\hat{x}}_{1 \cdots N^s},\hat{y}_{1, \cdots N^s}$, Target $\mathbf{x}_{1,\cdots,N^u}$, Batch Size $2\times B$
-   \REPEAT
-   \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
-   \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
-   \FOR{$i=1$ {\bfseries to} $B$}
-      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \in \mathcal{Y} /\hat{y}_i$} 
-   \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
-   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta_c}}$,  $\frac{\partial loss}{\partial \mathbf{\theta_s}}$, $\frac{\partial loss}{\partial \mathbf{\theta_t}}$
-   \ENDIF
-   \ENDFOR
-   \STATE $\mathbf{\theta_c} \leftarrow \mathbf{\theta_c} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta_c}}$, $\mathbf{\theta_s} \leftarrow \mathbf{\theta_s} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta_s}}$, $\mathbf{\theta_t} \leftarrow \mathbf{\theta_t} + \alpha \frac{\partial loss (y_i, \mathbf{W})}{\partial \mathbf{\theta_t}}$
-   \UNTIL CONVERGENCE or $MAX\_ITER$
-\end{algorithmic}
-\end{algorithm}
-\vspace{-17mm}
-  \end{minipage}
-  \end{wrapfigure}
 
 
 We solve this optimization problem via alternating minimization through iterating over solving for unsupervised labels $y_i$(transduction) and learning the similarity metric $\theta_c,\theta_s,\theta_t$ (adaptation). We explain these two steps in detail in the following sections.
-
-
-
 
 
  %} $ 
@@ -110,6 +82,7 @@ The $l(\xui,R)$ is smaller if none of the class has a majority, promoting reject
 \end{wrapfigure}
 \fi
 
+
 It is also critical that this formulation requires solving high number of nearest neighbors which is computationally challenging. Fortunately, we use stochastic gradient descent in our adaptation stage with a carefully chosen batch size, which requires us to only solve the transduction over a batch. %Furthermore, we also efficiently implement the distance computation in the form of a few OpenBLAS calls as we further explain in detail in Section~\ref{imp_det}.
 
 \subsection{Adaptation: Learning the Metric}
@@ -126,7 +99,7 @@ i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \qu
 \label{sup_nn}
 \end{equation}
 
-This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation assuming $i^{+}$ and $i^{-}$ are given before the adaptation stage.
+
 %\begin{equation}
 %\frac{\partial loss}{\partial \theta_s} = \sum_{i \in [N^s]} \mathds{1}(\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) - \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) < \alpha) \left[ \frac{\partial \Phi_s(\xsi)^\intercal}{\theta_s} \left(\Phi_t(\mathbf{x}_{i^+}) -  \Phi_t(\mathbf{x}_{i^-})\right) \right]
 %\end{equation}
@@ -134,4 +107,49 @@ This minimization is convex if feature functions are convex. This is typically n
 %\frac{\partial loss}{\partial \theta_t} = 
 %\sum_{i \in [N^s]} \mathds{1}(\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) - \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) < \alpha) \left[ \left(\frac{\partial \Phi_t(\mathbf{x}_{i^+})^\intercal}{\theta_t} - \frac{\partial \Phi_t(\mathbf{x}_{i^-})^\intercal}{\theta_t} \right)  \Phi_s(\xsi) \right]
 %\end{equation}
+
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \begin{minipage}{0.5\textwidth}
+    \vspace{-4mm}
+\begin{algorithm}[H]
+   \caption{Transduction with Domain Shift}
+   \label{alg:example}
+  \small
+\begin{algorithmic}
+   \STATE {\bfseries Input:} Source $\mathbf{\hat{x}}_{1 \cdots N^s},\hat{y}_{1, \cdots N^s}$, Target $\mathbf{x}_{1,\cdots,N^u}$, Batch Size $2\times B$
+   \REPEAT
+   \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
+   \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
+   \STATE $\alpha \leftarrow 0$
+   \FOR{$i=1$ {\bfseries to} $B$}
+      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \in \mathcal{Y} /\hat{y}_i$} 
+   \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
+   \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta_c}}$,  $\frac{\partial loss}{\partial \mathbf{\theta_s}}$, $\frac{\partial loss}{\partial \mathbf{\theta_t}}$
+   \STATE $\alpha \leftarrow \alpha + 1$
+   \ENDIF
+   \ENDFOR
+   \IF{$\alpha > 0$}
+   \STATE $\mathbf{\theta_c} \leftarrow \mathbf{\theta_c} + \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_c}}$, $\mathbf{\theta_s} \leftarrow \mathbf{\theta_s} + \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_s}}$, \\ $\mathbf{\theta_t} \leftarrow \mathbf{\theta_t} + \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_t}}$
+   \ENDIF
+   \UNTIL convergence \textbf{or} max\_iter
+\end{algorithmic}
+\end{algorithm}
+\vspace{-18mm}
+  \end{minipage}
+  \end{wrapfigure}
+
+This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation \emph{(see supplementary material for details)}.
+
+\subsection{Implementation Details}
+\label{imp_det}
+We use Convolutional Neural Networks (CNNs) as our feature functions. Specifically, we use Alexnet~\cite{alexnet} and LeNet~\cite{lenet} architectures with small modifications. We remove their final softmax layer and change the size of the final fully connected layer according to the desired feature dimension. We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains, and the final layers are learned separately. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} only modifying the final feature dimensionality (embedding size). Explicitly, we use the following architectures for domains:
+
+\noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as; \includegraphics[width=0.40\columnwidth]{lenet}
+
+\noindent \textbf{Office:} AlexNet\cite{alexnet} as; \includegraphics[width=0.73\columnwidth]{alexnet}
+
+where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU and \textbf{F} is fully connected layer. 
+
+Since the office dataset is quite small, we do not learn the network from scratch for office experiments and instead we initialize with the weights pre-trained on ImageNet. In all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent to learn the feature function with AdaGrad\cite{adagrad}. We initialize variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $512$. We start the rejection penalty with $\gamma=0.1$ and linearly increase with each epoch as $\gamma=\frac{\#epoch -1}{M}+0.1$. In our experiments we use $M=20$ and discuss the sensitivity of our algorithm to $M$ in supplementary material.
+
   

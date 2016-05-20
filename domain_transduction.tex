@@ -1,6 +1,9 @@
 \documentclass{article}
 
+\usepackage[font=small]{caption}
+
 \usepackage{nips_2016} 
+\usepackage{xspace}
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
@@ -48,6 +51,7 @@
 \newcommand{\yuj}{y_j}
 \newcommand{\sw}{s_{ \textsc{\relsize{-2}{\textsl{W}}} }}
 
+\newcommand*{\eg}{e.g.\@\xspace}
 
 
 % Employ this version of the ``usepackage'' statement after the paper has
@@ -109,11 +113,11 @@ Nevertheless, these recent deep learning based domain adaptation approaches stil
 
 \section{Introduction}
 \label{intro}
-Recently, deep convolutional neural networks \cite{alexnet, vggnet, googlenet} have propelled unprecedented advances in artificial intelligence including object recognition, speech recognition, and image captioning. Although these networks are very good at learning state of the art feature representations and recognize discriminative patterns, one of the major drawbacks is that the network requires huge of labelled training data to fit the millions of parameters in the complex network. However, creating such datasets with complete annotations is not only tedious and error prone, but also extremely costly. In this regard, the research community has proposed different mechanisms such as semi-supervised learning \cite{semisup1,semisup2,semisup3}, transfer learning \cite{transfer1, transfer2}, weakly labelled learning, and domain adaptation. Among these approaches, domain adaptation is one of the most appealing techniques when a fully annotated dataset (e.g. ImageNet \cite{ImageNet}, Sports1M \cite{sports1m}) is already available as a reference. 
+Recently, deep convolutional neural networks \cite{alexnet, vggnet, googlenet} have propelled unprecedented advances in artificial intelligence including object recognition, speech recognition, and image captioning. Although these networks are very good at learning state of the art feature representations and recognize discriminative patterns, one of the major drawbacks is that the network requires huge labelled training data to fit the millions of parameters in the complex network. However, creating such datasets with complete annotations is not only tedious and error prone, but also extremely costly. In this regard, the research community has proposed different mechanisms such as semi-supervised learning \cite{semisup1,semisup2,semisup3}, transfer learning \cite{transfer1, transfer2}, weakly labelled learning, and domain adaptation. Among these approaches, domain adaptation is one of the most appealing techniques when a fully annotated dataset (e.g. ImageNet \cite{ImageNet}, Sports1M \cite{sports1m}) is already available as a reference. 
 
 The goal of unsupervised domain adaptation, in particular, is: given a fully labeled source dataset and an unlabeled target dataset, to learn a model which can generalize to the target domain while taking the domain shift across the datasets into account. The majority of the literature \cite{gong12, baochen15, fernando13, baochen16, tommasi13} in unsupervised domain adaptation formulates a learning problem where the task is to find a transformation matrix to align the labelled source data distribution to the unlabelled target data distribution. Although these approaches have shown promising results, they show accuracy degradation because of the discrepancy between the learning procedure and the actual target inference procedure. In this paper, we aim to address this issue by incorporating the unknown target labels into the training procedure.
 
-In this regard, we formulate a unified deep learning framework where the feature representation, domain transformation parameter, and the target labels are all jointly optimized in an end-to-end fashion. The proposed framework first takes as input batch of labelled source and unlabelled target examples, maps the batch of raw input examples into deep representation. Then, the framework computes the loss of the input batch based on the two stage optimization where it alternates between inferring the labels of the sampled target examples transductively and optimizing the domain transformation parameters.
+In this regard, we formulate a unified deep learning framework where the feature representation, domain transformation, and the target labels are all jointly optimized in an end-to-end fashion. The proposed framework first takes as input batch of labelled source and unlabelled target examples, maps the batch of raw input examples into deep representation. Then, the framework computes the loss of the input batch based on the two stage optimization where it alternates between inferring the labels of the target examples transductively and optimizing the domain transformation parameters.
 
 Concretely, in the transduction stage, given the fixed domain transform parameter, we jointly infer all target labels by solving a discrete multi-label energy minimization problem. In the adaptation stage, given a fixed target label assignment, we seek to find the optimal asymmetric metric  between the source and the target data. The advantage of our method is that we can jointly learn the optimal feature representation and the optimal domain transformation parameter which are aware of the subsequent transductive inference procedure. 
 
