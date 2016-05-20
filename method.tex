@@ -101,16 +101,27 @@ i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \qu
 %\sum_{i \in [N^s]} \mathds{1}(\Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^+}) - \Phi_s(\xsi)^\intercal \Phi_t(\mathbf{x}_{i^-}) < \alpha) \left[ \left(\frac{\partial \Phi_t(\mathbf{x}_{i^+})^\intercal}{\theta_t} - \frac{\partial \Phi_t(\mathbf{x}_{i^-})^\intercal}{\theta_t} \right)  \Phi_s(\xsi) \right]
 %\end{equation}
 
+This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation \emph{(see supplementary material for details)}.
+
+
+\subsection{Implementation Details}
+\label{imp_det}
+We use Alexnet~\cite{alexnet} and LeNet~\cite{lenet} architectures with small modifications. We remove their final softmax layer and change the size of the final fully connected layer according to the desired feature dimension. We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains, and the final layers are learned separately. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} only modifying the final feature dimensionality (embedding size). Explicitly, we use the following architectures for domains:
+
+\noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as; \includegraphics[width=0.40\columnwidth]{lenet}
+
+\noindent \textbf{Office:} AlexNet\cite{alexnet} as; \includegraphics[width=0.73\columnwidth]{alexnet}
+
 \begin{wrapfigure}{r}{0.5\textwidth}
     \begin{minipage}{0.5\textwidth}
-    \vspace{-4mm}
+    \vspace{-9mm}
 \begin{algorithm}[H]
    \caption{Transduction with Domain Shift}
    \label{alg:example}
   \small
 \begin{algorithmic}
    \STATE {\bfseries Input:} Source $\mathbf{\hat{x}}_{1 \cdots N^s},\hat{y}_{1, \cdots N^s}$, Target $\mathbf{x}_{1,\cdots,N^u}$, Batch Size $2\times B$
-   \REPEAT
+   \FOR  {$t=0$ \textbf{ to } \texttt{max\_iter} }
    \STATE  Sample $\{\xsb,\ysb \}$, $\{\xub\}$
    \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
    \STATE $\alpha \leftarrow 0$
@@ -122,27 +133,18 @@ i^{+} = {\arg\max}_{j | y_j = \hat{y}_i} \Phi_s(\xsi)^\intercal \Phi_t(\xuj) \qu
    \ENDIF
    \ENDFOR
    \IF{$\alpha > 0$}
-   \STATE $\mathbf{\theta_c} \leftarrow \mathbf{\theta_c} + \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_c}}$, $\mathbf{\theta_s} \leftarrow \mathbf{\theta_s} + \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_s}}$, \\ $\mathbf{\theta_t} \leftarrow \mathbf{\theta_t} + \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_t}}$
+   \STATE $\eta(t) \leftarrow$ Adagrad Rule \cite{adagrad}
+   \STATE $\mathbf{\theta_c} \leftarrow \mathbf{\theta_c} + \eta(t) \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_c}}$, $\mathbf{\theta_s} \leftarrow \mathbf{\theta_s} + \eta(t) \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_s}}$, \\ $\mathbf{\theta_t} \leftarrow \mathbf{\theta_t} + \eta(t) \frac{1}{\alpha} \frac{\partial loss}{\partial \mathbf{\theta_t}}$
    \ENDIF
-   \UNTIL convergence \textbf{or} max\_iter
+   \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 \vspace{-18mm}
   \end{minipage}
   \end{wrapfigure}
+  
+  where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU and \textbf{F} is fully connected layer. 
 
-This minimization is convex if feature functions are convex. This is typically not the case with convolution neural networks; however, the gradient descent type algorithms are still applicable and works well in practice. Hence, we optimize this function via stochastic gradient descent using the sub-gradients $\frac{\partial loss}{\partial \theta_s}, \frac{\partial loss}{\partial \theta_t}$ and $\frac{\partial loss}{\partial \theta_c}$. These sub-gradients can be efficiently computed with back-propagation \emph{(see supplementary material for details)}.
-
-\subsection{Implementation Details}
-\label{imp_det}
-We use Alexnet~\cite{alexnet} and LeNet~\cite{lenet} architectures with small modifications. We remove their final softmax layer and change the size of the final fully connected layer according to the desired feature dimension. We consider the last fully connected layer as domain specific feature ($\theta_s$, $\theta_t$) and the rest as common network $\theta_c$. Common network weights are tied between domains, and the final layers are learned separately. In order to have a fair comparison with existing algorithms, we follow the same architecture used by \cite{ganin15} only modifying the final feature dimensionality (embedding size). Explicitly, we use the following architectures for domains:
-
-\noindent \textbf{MNIST} and \textbf{SVHN:} LeNet\cite{lenet} as; \includegraphics[width=0.40\columnwidth]{lenet}
-
-\noindent \textbf{Office:} AlexNet\cite{alexnet} as; \includegraphics[width=0.73\columnwidth]{alexnet}
-
-where \textbf{C} is convolution, \textbf{P} is max-pooling, \textbf{R} is ReLU and \textbf{F} is fully connected layer. 
 
 Since the office dataset is quite small, we do not learn the network from scratch for office experiments and instead we initialize with the weights pre-trained on ImageNet. In all of our experiments, we set the feature dimension as $128$. We use stochastic gradient descent to learn the feature function with AdaGrad\cite{adagrad}. We initialize variables with truncated normals having unit variance and use the learning rate \SI{2.5e-4}  and the batch size $512$. We start the rejection penalty with $\gamma=0.1$ and linearly increase with each epoch as $\gamma=\frac{\#epoch -1}{M}+0.1$. In our experiments we use $M=20$ and discuss the sensitivity of our algorithm to $M$ in supplementary material.
-
   

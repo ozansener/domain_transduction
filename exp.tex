@@ -48,11 +48,11 @@ Our Method (full) & $\mathbf{.814}$ & $\mathbf{.971}$ & $\mathbf{.993}$ & $\math
 \end{small}
 \end{center}
 \end{sc}
-\vspace{-2mm}
+\vspace{-0mm}
 \end{table*}
 
 \begin{wraptable}{r}{0.5\textwidth}
-\vspace{-4mm}
+\vspace{-2mm}
 %\begin{table}[ht]
 \setlength{\tabcolsep}{3pt}
 \caption{Accuracy on the digit classification task.}
@@ -76,7 +76,7 @@ Our Method(full) & $\mathbf{.839}$ & $\mathbf{.875}$ & $\mathbf{.799}$ & $\mathb
 \end{tabular}}
 \end{small}
 \end{sc}
-\vspace{-5mm}
+\vspace{-2mm}
 \end{wraptable}
 
 Table~\ref{tab:res}\&\ref{tab:res2} shows results on object recognition and digit classification tasks covering all adaptation scenarios. Our experiments show that proposed method outperforms all state-of-the-art algorithms. Moreover, the increase in the accuracy is rather significant when there is a large domain difference such as MNIST$\leftrightarrow$MNIST-M, MNIST$\leftrightarrow$SVHN, Amazon$\leftrightarrow$Webcam and Amazon$\leftrightarrow$D-SLR. Our hypothesis is that the state-of-the-art algorithms such as \cite{ganin15} are seeking for features invariant to the domains whereas we seek for an explicit similarity metric explaining both differences and similarities of domains. In other words, instead of seeking for an invariance, we seek for an equivariance. %TODO(ozan): elaborate here
@@ -87,7 +87,7 @@ Table~\ref{tab:res2} further suggests our algorithm is the only one which can su
 
 Another interesting conclusion is the asymmetric results. For example, the accuracy of adapting webcam to Amazon and adapting Amazon to webcam is significantly different. The similar behavior exists in MNIST and SVHN. This observation validates the importance of an asymmetric modeling.
 
-To evaluate the importance of joint labelling and reject option, we compare our method with self baselines. Our self-baselines are versions of our algorithm not using reject option (\textbf{no reject}) and the version neither using reject option nor using joint labelling (\textbf{k-NN only}). Results on both experiments suggest that joint labelling and the reject option are both crucial for successful transduction. 
+To evaluate the importance of joint labelling and reject option, we compare our method with self baselines. Our self-baselines are versions of our algorithm not using reject option (\textbf{no reject}) and the version neither using reject option nor using joint labelling (\textbf{k-NN only}). Results on both experiments suggest that joint labelling and the reject option are both crucial for successful transduction. Moreover, reject option is more important when the domain shift is large (\eg MNIST$\rightarrow$SVHN). This is expected since transduction under large  shift is more likely to fail which can be prevented with reject option.
 
 \begin{wrapfigure}{r}{0.4\textwidth}
 \small
@@ -104,10 +104,9 @@ To evaluate the importance of joint labelling and reject option, we compare our 
 %The drop in the accuracy after the nearest neighbors is expected since our loss function only models the nearest one.}
 \label{fig:nnoffice}
 \end{small}
-\vspace{-15mm}
+\vspace{-5mm}
 \end{wrapfigure}
 
-\noindent Moreover, reject option is more important when the domain shift is large (\eg MNIST$\rightarrow$SVHN). This is expected since transduction under large  shift is more likely to fail which can be prevented with reject option.
 
 
 
@@ -133,18 +132,18 @@ In Figure~\ref{fig:tsnedigit}, we show the digit images of source and target aft
 
   
 \begin{figure*}[ht]
-    \begin{subfigure}[b]{0.25\textwidth}
+    \begin{subfigure}[t]{0.25\textwidth}
         \includegraphics[width=\textwidth]{before_c_s_c}
         \caption{S. w/o Adaptation}
         \label{fig:gull}
-    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
+    \end{subfigure}~\begin{subfigure}[t]{0.25\textwidth}
         \includegraphics[width=\textwidth]{after_c_s_c}
         \caption{S. with Adaptation}
-    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
+    \end{subfigure}~\begin{subfigure}[t]{0.25\textwidth}
         \includegraphics[width=\textwidth]{before_c_t_c}
         \caption{T w/o Adaptation}
         \label{fig:gull}
-    \end{subfigure}~\begin{subfigure}[b]{0.25\textwidth}
+    \end{subfigure}~\begin{subfigure}[t]{0.25\textwidth}
         \includegraphics[width=\textwidth]{after_c_t_c}
         \caption{T with Adaptation}
     \end{subfigure}
