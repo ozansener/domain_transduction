@@ -61,7 +61,7 @@ We define our transduction sub-problem as:
 
 \begin{equation}
 \begin{aligned}
-\min_{y_1, \ldots y_{N^u} \in \mathcal{Y} \cup R}  &\sum_{i \in [N^u]} l(\xui, y_i) + \lambda \sum_{i \in [N^u]} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
+\min_{y_1, \ldots y_{N^u} \in \mathcal{Y} \cap R}  &\sum_{i \in [N^u]} l(\xui, y_i) + \lambda \sum_{i \in [N^u]} \sum_{\xuj \in \mathcal{N}(\xui)} \Phi_t(\xui)^\intercal \Phi_t(\xuj)\mathds{1}(y_i \neq y_j)
 \end{aligned}
 \label{robtran}
 \end{equation}
