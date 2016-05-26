@@ -128,7 +128,7 @@ We use Alexnet~\cite{alexnet} and LeNet~\cite{lenet} architectures with small mo
    \STATE Solve (\ref{robtran}) for $\{y_{1 \cdots B}\}$
    \STATE $\alpha \leftarrow 0$
    \FOR{$i=1$ {\bfseries to} $B$}
-      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \in \mathcal{Y} /\hat{y}_i$} 
+      \IF{$ \hat{y}_i \in y_{1 \cdots B} \textbf{ and } \exists k ~y_k \in \mathcal{Y} \setminus \hat{y}_i$} 
    \STATE Compute ($i^+, i^-$) using $\{y_{1 \cdots B}\}$ in (\ref{sup_nn})
    \STATE Update $\frac{\partial loss}{\partial \mathbf{\theta_c}}$,  $\frac{\partial loss}{\partial \mathbf{\theta_s}}$, $\frac{\partial loss}{\partial \mathbf{\theta_t}}$
    \STATE $\alpha \leftarrow \alpha + 1$
